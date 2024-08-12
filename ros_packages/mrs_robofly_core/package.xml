@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+
+  <name>mrs_robofly_core</name>
+  <version>1.0.0</version>
+  <description>Core resources for the Fly4Future's Robofly drone</description>
+
+  <author email="tomas.baca@fel.cvut.cz">Tomas Baca</author>
+  <maintainer email="tomas.baca@fel.cvut.cz">Tomas Baca</maintainer>
+
+  <license>BSD 3-Clause</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>cmake_modules</depend>
+  <depend>rospy</depend>
+
+  <depend>libcamera_ros_driver</depend>
+  <depend>mrs_icm_imu_driver</depend>
+
+</package>
