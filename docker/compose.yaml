@@ -8,9 +8,9 @@ services:
 
   prepare_configs:
     image: ctumrs/robofly:config
-    build:
-      context: shared_data
-      dockerfile: Dockerfile
+    # build:
+    #   context: shared_data
+    #   dockerfile: Dockerfile
     volumes:
       - config:/etc/config:consistent
     command: bash -c "cp -r /etc/ctu-mrs/config/* /etc/config/"
