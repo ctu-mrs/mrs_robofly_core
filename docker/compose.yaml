@@ -93,7 +93,7 @@ services:
       - bag_files:/etc/bag_files:consistent
     env_file:
       - ./variables.env
-    command: bash -c "waitForTime && cd /etc/bag_files && rosbag record -a"
+    command: bash -c "waitForTime && ./record.sh"
 
   terminal:
     image: ctumrs/mrs_uav_system:latest
