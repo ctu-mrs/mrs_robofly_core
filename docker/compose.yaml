@@ -9,8 +9,8 @@ services:
   prepare_configs:
     image: ctumrs/mrs_uav_system:config
     build:
-      context: backend
-      dockerfile: ./config/Dockerfile
+      context: shared_data
+      dockerfile: Dockerfile
     volumes:
       - config:/etc/config:consistent
     command: bash -c "cp -r /etc/ctu-mrs/config/* /etc/config/"
