@@ -99,6 +99,7 @@ services:
     network_mode: host
     volumes:
       - bag_files:/etc/bag_files:consistent
+      - config:/etc/config:consistent
     env_file:
       - ./variables.env
     command: bash -c "waitForTime && /etc/config/record.sh"
