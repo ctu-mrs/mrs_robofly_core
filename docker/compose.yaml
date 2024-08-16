@@ -6,20 +6,20 @@ volumes:
 
 services:
 
-  prepare_configs:
-    image: ctumrs/robofly:config
-    # build:
-    #   context: shared_data
-    #   dockerfile: Dockerfile
-    volumes:
-      - config:/etc/config:consistent
-    command: bash -c "cp -r /etc/ctu-mrs/config/* /etc/config/"
+  # prepare_configs:
+  #   image: ctumrs/robofly:config
+  #   # build:
+  #   #   context: shared_data
+  #   #   dockerfile: Dockerfile
+  #   volumes:
+  #     - config:/etc/config:consistent
+  #   command: bash -c "cp -r /etc/ctu-mrs/config/* /etc/config/"
 
   ros-master:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
-    depends_on:
-      - prepare_configs
+    # depends_on:
+    #   - prepare_configs
     env_file:
       - ./variables.env
     command: roscore
