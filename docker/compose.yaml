@@ -7,7 +7,7 @@ volumes:
 services:
 
   prepare_configs:
-    image: ctumrs/mrs_uav_system:config
+    image: ctumrs/robofly:config
     build:
       context: shared_data
       dockerfile: Dockerfile
