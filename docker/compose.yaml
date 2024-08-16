@@ -1,19 +1,25 @@
 volumes:
 
   config:
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: ./config
 
   bag_files:
 
 services:
 
+  prepare_configs:
+    image: ctumrs/mrs_uav_system:config
+    build:
+      context: backend
+      dockerfile: ./config/Dockerfile
+    volumes:
+      - config:/etc/config:consistent
+    command: bash -c "cp -r /etc/ctu-mrs/config/* /etc/config/"
+
   ros-master:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
+    depends_on:
+      - prepare_configs
     env_file:
       - ./variables.env
     command: roscore
@@ -21,6 +27,8 @@ services:
   ros-time:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
+    depends_on:
+      - ros-master
     env_file:
       - ./variables.env
     command: bash -c "waitForRos && rosparam set use_sim_time false"
@@ -96,7 +104,7 @@ services:
     command: bash -c "waitForTime && /etc/config/record.sh"
 
   terminal:
-    image: ctumrs/mrs_uav_system:latest
+    image: ctumrs/mrs_uav_system:robofly
     network_mode: host
     env_file:
       - ./variables.env
