@@ -1,3 +1,4 @@
 #!/bin/bash
 
-docker buildx build . --file Dockerfile --tag ctumrs/robofly:config --platform=linux/amd64,linux/arm64
+docker buildx create --name container --driver=docker-container
+docker buildx build . --file Dockerfile --tag ctumrs/robofly:config --platform=linux/arm64

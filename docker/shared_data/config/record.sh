@@ -1,6 +1,6 @@
 #!/bin/bash
 
-path="/etc/bag_files"
+path="/etc/bag_files/"
 
 # By default, we record everything.
 # Except for this list of EXCLUDED topics:
