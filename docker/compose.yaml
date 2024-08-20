@@ -1,27 +1,25 @@
 volumes:
 
-  config:
+  shared_data:
 
   bag_files:
 
 services:
 
-  prepare_configs:
-    image: ctumrs/robofly:config
-    # build:
-    #   context: shared_data
-    #   dockerfile: Dockerfile
+  # will copy data shared between containers form the shared_data container to the shared volume
+  shared_data:
+    image: klaxalk:5000/robofly:shared_data
     volumes:
-      - config:/etc/config:consistent
-    command: bash -c "cp -r /etc/ctu-mrs/config/* /etc/config/"
+      - shared_data:/etc/shared_data:consistent
+    command: cp -r /etc/ctu-mrs/shared_data /etc/ctu-mrs
 
   ros-master:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
     depends_on:
-      - prepare_configs
+      - shared_data
     env_file:
-      - ./variables.env
+      - ./stack.env
     command: roscore
 
   ros-time:
@@ -30,7 +28,7 @@ services:
     depends_on:
       - ros-master
     env_file:
-      - ./variables.env
+      - ./stack.env
     command: bash -c "waitForRos && rosparam set use_sim_time false"
 
   hw_api:
@@ -39,9 +37,9 @@ services:
       - ros-time
     network_mode: host
     volumes:
-      - config:/etc/config:consistent
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
-      - ./variables.env
+      - ./stack.env
     command: bash -c "waitForTime && roslaunch mrs_uav_px4_api api.launch"
 
   core:
@@ -50,10 +48,10 @@ services:
       - ros-time
     network_mode: host
     volumes:
-      - config:/etc/config:consistent
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
-      - ./variables.env
-    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_deployment`/config/mrs_uav_system/$$UAV_TYPE.yaml custom_config:=/etc/config/custom_config.yaml world_config:=/etc/config/world_config.yaml network_config:=/etc/config/network_config.yaml"
+      - ./stack.env
+    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_deployment`/config/mrs_uav_system/$$UAV_TYPE.yaml custom_config:=/etc/config/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_config.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
 
   camera1:
     image: ctumrs/mrs_uav_system:robofly
@@ -61,13 +59,13 @@ services:
       - ros-time
     network_mode: host
     volumes:
-      - config:/etc/config:consistent
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
     devices:
       - /dev/:/dev/
     privileged: true
     env_file:
-      - ./variables.env
-    command: bash -c "waitForTime && roslaunch libcamera_ros_driver uav.launch custom_config:=/etc/config/camera.yaml"
+      - ./stack.env
+    command: bash -c "waitForTime && roslaunch libcamera_ros_driver uav.launch custom_config:=/etc/ctu-mrs/shared_data/camera.yaml"
 
   imu:
     image: ctumrs/mrs_uav_system:robofly
@@ -75,10 +73,10 @@ services:
       - ros-time
     network_mode: host
     volumes:
-      - config:/etc/config:consistent
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
       - /dev/:/dev/
     env_file:
-      - ./variables.env
+      - ./stack.env
     command: bash -c "waitForTime && roslaunch mrs_icm_imu_driver imu.launch"
 
   automatic_start:
@@ -87,9 +85,9 @@ services:
       - ros-time
     network_mode: host
     volumes:
-      - config:/etc/config:consistent
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
-      - ./variables.env
+      - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
 
   rosbag:
@@ -99,20 +97,22 @@ services:
     network_mode: host
     volumes:
       - bag_files:/etc/bag_files:consistent
-      - config:/etc/config:consistent
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
-      - ./variables.env
-    command: bash -c "waitForTime && /etc/config/record.sh"
+      - ./stack.env
+    command: bash -c "waitForTime && /etc/ctu-mrs/shared_data/record.sh"
 
   terminal:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
+    depends_on:
+      - shared_data
     env_file:
-      - ./variables.env
+      - ./stack.env
     entrypoint: ["/bin/bash", "-c"]
     volumes:
       - bag_files:/etc/bag_files:consistent
-      - config:/etc/config:consistent
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
     command:
       - source /opt/ros/noetic/setup.bash && /bin/bash
     stdin_open: true
