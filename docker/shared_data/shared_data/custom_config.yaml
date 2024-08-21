@@ -9,12 +9,38 @@ mrs_uav_managers:
 
     # loaded state estimator plugins
     state_estimators: [
-      "gps_garmin",
       "gps_baro",
     ]
 
     initial_state_estimator: "gps_baro" # will be used as the first state estimator
-    agl_height_estimator: "garmin_agl" # only slightly filtered height for checking min height (not used in control feedback)
+    agl_height_estimator: "" # only slightly filtered height for checking min height (not used in control feedback)
+
+    gps_baro: # namespace of the state estimator
+
+      alt_baro: # namespace of the altitude estimator
+
+        process_noise: # process noise covariance (Q)
+          pos: 1.0 # position state
+          vel: 10.0 # velocity state
+          acc: 100.0 # acceleration state
+
+        corrections: [
+          # positional correction only makes the estimator unstable, vel_hw_api is not a derivative of pos_hw_api, vel_hw_api_only works best
+          "pos_hw_api"
+        ]
+
+        pos_hw_api:
+          state_id: 0 # 0 - position, 1 - velocity, 2 - acceleration
+          noise: 0.001 # measurement noise covariance (R)
+          noise_unhealthy_coeff: 100.0 # covariance gets multiplied by this coefficient when correction is unhealthy (R)
+          message:
+            type: "geometry_msgs/PointStamped"
+            topic: "hw_api/position" # without uav namespace
+            limit: 
+              delay: 1.0 # [s] messages with higher delay will flag correction as unhealthy
+              time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
+
+          processors: [] # types of processors attached to this measurement
 
   uav_manager:
 

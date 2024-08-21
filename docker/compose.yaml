@@ -10,8 +10,8 @@ services:
   shared_data:
     image: klaxalk:5000/robofly:shared_data
     volumes:
-      - shared_data:/etc/shared_data:consistent
-    command: cp -r /etc/ctu-mrs/shared_data /etc/ctu-mrs
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
+    command: cp -r /etc/shared_data /etc/ctu-mrs
 
   ros-master:
     image: ctumrs/mrs_uav_system:robofly
@@ -30,6 +30,19 @@ services:
     env_file:
       - ./stack.env
     command: bash -c "waitForRos && rosparam set use_sim_time false"
+
+  sensors:
+    image: ctumrs/mrs_uav_system:robofly
+    depends_on:
+      - ros-time
+    network_mode: host
+    volumes:
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - /dev/:/dev/
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForTime && roslaunch mrs_uav_deployment sensors.launch"
 
   hw_api:
     image: ctumrs/mrs_uav_system:robofly
@@ -51,7 +64,7 @@ services:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_deployment`/config/mrs_uav_system/$$UAV_TYPE.yaml custom_config:=/etc/config/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_config.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
+    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_deployment`/config/mrs_uav_system/$$UAV_TYPE.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=`rospack find mrs_uav_deployment`/config/worlds/world_$$WORLD_NAME.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
 
   camera1:
     image: ctumrs/mrs_uav_system:robofly
@@ -90,6 +103,17 @@ services:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
 
+  uav_status:
+    image: ctumrs/mrs_uav_system:robofly
+    depends_on:
+      - ros-time
+    network_mode: host
+    volumes:
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForHw && roslaunch mrs_uav_status acquisition.launch"
+
   rosbag:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
@@ -113,7 +137,9 @@ services:
     volumes:
       - bag_files:/etc/bag_files:consistent
       - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - /dev/:/dev/
     command:
       - source /opt/ros/noetic/setup.bash && /bin/bash
+    privileged: true
     stdin_open: true
     tty: true
