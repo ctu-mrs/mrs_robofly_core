@@ -10,7 +10,7 @@ mrs_uav_managers:
     # loaded state estimator plugins
     # available in mrs_uav_state_estimators: gps_garmin, gps_baro, rtk, aloam, ground_truth, dummy
     state_estimators: [
-    # "gps_baro",
+    "gps_baro",
     "open_vins",
     ]
 
@@ -251,29 +251,30 @@ mrs_uav_managers:
       "gps_baro",
     ]
 
-    constraints: [
-      "slow",
-      "medium",
-      "fast"
-    ]
-
     # list of allowed gains per odometry mode
     allowed_constraints:
       gps_baro: ["slow", "medium", "fast"]
       open_vins: ["slow", "medium", "fast"]
 
-    constraints: [
-      "slow",
-      "medium",
-      "fast",
-    ]
-
-    allowed_constraints:
-      gps_baro: ["slow", "medium", "fast"]
-
     default_constraints:
       gps_baro: "medium"
       open_vins: "medium"
+
+  gain_manager:
+
+    estimator_types: [
+      "open_vins",
+      "gps_baro",
+    ]
+
+    # list of allowed gains per odometry mode
+    allowed_gains:
+      gps_baro: ["soft", "supersoft"]
+      open_vins: ["soft", "supersoft"]
+
+    default_gains:
+      gps_baro: "supersoft"
+      open_vins: "supersoft"
 
 mrs_uav_trackers:
 
