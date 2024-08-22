@@ -29,7 +29,7 @@ services:
       - ros-master
     env_file:
       - ./stack.env
-    command: bash -c "waitForRos && rosparam set use_sim_time false"
+    command: bash -c "waitForRos && rosparam set use_sim_time false && read"
 
   sensors:
     image: ctumrs/mrs_uav_system:robofly
@@ -114,6 +114,28 @@ services:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_status acquisition.launch"
 
+  open_vins:
+    image: ctumrs/mrs_uav_system:robofly
+    depends_on:
+      - ros-time
+    network_mode: host
+    volumes:
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForHw && roslaunch roslaunch mrs_open_vins_core robofly.launch"
+
+  open_vins_republisher:
+    image: ctumrs/mrs_uav_system:robofly
+    depends_on:
+      - ros-time
+    network_mode: host
+    volumes:
+      - shared_data:/etc/ctu-mrs/shared_data:consistent
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForHw && roslaunch mrs_vins_republisher vins_republisher_openvins_unreal.launch"
+
   rosbag:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
@@ -139,7 +161,7 @@ services:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
       - /dev/:/dev/
     command:
-      - source /opt/ros/noetic/setup.bash && /bin/bash
+      - bash --rcfile /opt/ros/noetic/setup.bash
     privileged: true
     stdin_open: true
     tty: true

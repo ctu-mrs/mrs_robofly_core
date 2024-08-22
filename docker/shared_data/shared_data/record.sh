@@ -16,14 +16,28 @@ exclude=(
 # ROS communication hiccups, which can lead to eland, failsafe
 # or just a CRASH.
 
-# Every topic containing "compressed"
-'(.*)compressed(.*)'
-# Every topic containing "image_raw"
-'(.*)image_raw(.*)'
-# Every topic containing "theora"
-'(.*)theora(.*)'
-# Every topic containing "h264"
-'(.*)h264(.*)'
+'(.*)bond'
+
+'(.*)camera_front(.*)'
+
+'(.*)ov_msckf(.*)'
+
+'(.*)mavros(.*)'
+
+'(.*)mavlink(.*)'
+
+'(.*)estimation_manager(.*)proc'
+'(.*)estimation_manager(.*)raw'
+'(.*)estimation_manager(.*)input'
+'(.*)estimation_manager(.*)odom'
+'(.*)estimation_manager(.*)innovation'
+
+'(.*)vins_republisher(.*)'
+
+'(.*)parameter_descriptions'
+'(.*)parameter_updates'
+
+'(.*)mpc_tracker/string'
 
 )
 
