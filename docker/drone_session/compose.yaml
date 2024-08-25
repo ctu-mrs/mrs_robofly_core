@@ -64,7 +64,7 @@ services:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_deployment`/config/mrs_uav_system/$$UAV_TYPE.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=`rospack find mrs_uav_deployment`/config/worlds/world_$$WORLD_NAME.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
+    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_deployment`/config/mrs_uav_system/$$UAV_TYPE.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_local.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
 
   camera1:
     image: ctumrs/mrs_uav_system:robofly
@@ -123,7 +123,7 @@ services:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForHw && roslaunch roslaunch mrs_open_vins_core robofly.launch"
+    command: bash -c "waitForHw && roslaunch mrs_open_vins_core robofly.launch"
 
   open_vins_republisher:
     image: ctumrs/mrs_uav_system:robofly

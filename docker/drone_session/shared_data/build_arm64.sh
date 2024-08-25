@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOCAL_TAG=robofly:shared_data
+LOCAL_TAG=robofly:shared_data_gps
 REGISTRY=localhost:5000
 
 docker buildx create --name container --driver=docker-container

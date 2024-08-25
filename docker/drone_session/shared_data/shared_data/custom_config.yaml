@@ -1,21 +1,54 @@
 mrs_uav_managers:
 
   control_manager:
+
     Se3Controller:
+
       eland_threshold: 2.5
       failsafe_threshold: 3.5
+
+    rc_joystick:
+
+      horizontal_speed: 3.00 # [m/s]
+      vertical_speed: 2.00 # [m/s]
+      heading_rate: 2.0 # [rad/s]
 
   estimation_manager:
 
     # loaded state estimator plugins
     # available in mrs_uav_state_estimators: gps_garmin, gps_baro, rtk, aloam, ground_truth, dummy
     state_estimators: [
-    "gps_baro",
+    # "gps_baro",
     "open_vins",
+    # "vins_kickoff",
     ]
 
     initial_state_estimator: "open_vins" # will be used as the first state estimator
     agl_height_estimator: "" # only slightly filtered height for checking min height (not used in control feedback)
+
+    # namespace of the state estimator
+    vins_kickoff:
+
+      address: "vins_kickoff/VinsKickoffEstimatorPlugin"
+
+      requires: # data required from the hw api
+        gnss: false
+        imu: false
+        distance_sensor: false
+        altitude: false
+        magnetometer_heading: false
+        position: false
+        orientation: true
+        velocity: true
+        angular_velocity: true
+
+      topics:
+        orientation: "hw_api/orientation" # orientation passthrough
+        angular_velocity: "hw_api/angular_velocity" # angular velocity passthrough
+
+      kickoff:
+        target_estimator: "open_vins" # orientation passthrough
+        max_duration: 2.0 # angular velocity passthrough
 
     gps_baro: # namespace of the state estimator
 
@@ -226,7 +259,7 @@ mrs_uav_managers:
       after_takeoff:
         controller: "Se3Controller"
 
-      takeoff_height: 0.8
+      takeoff_height: 1.5
 
     midair_activation:
       after_activation:
@@ -244,37 +277,53 @@ mrs_uav_managers:
       inverted: true # publish as inverted tf (the default for inverted mrs tf tree convention)
       republish_in_frames: [] # the odometry message will be transformed and republished in the specified frames
 
+    vins_kickoff:
+      odom_topic: "odom" # name of the topic (expects nav_msgs/Odometry topic type)
+      tf_from_attitude: # used for transforming velocities before full transform is available
+        enabled: false
+        attitude_topic: "attitude" # name of the attitude topic(expects geometry_msgs/QuaternionStamped topic type)
+      namespace: "estimation_manager/vins_kickoff" # the namespace of the topic (usually the node that publishes the topic)
+      utm_based: false # if true, will publish tf to utm_origin
+      inverted: true # publish as inverted tf (the default for inverted mrs tf tree convention)
+      republish_in_frames: [] # the odometry message will be transformed and republished in the specified frames
+
   constraint_manager:
 
     estimator_types: [
       "open_vins",
       "gps_baro",
+      "vins_kickoff",
     ]
 
     # list of allowed gains per odometry mode
     allowed_constraints:
       gps_baro: ["slow", "medium", "fast"]
       open_vins: ["slow", "medium", "fast"]
+      vins_kickoff: ["slow"]
 
     default_constraints:
       gps_baro: "medium"
       open_vins: "medium"
+      vins_kickoff: "slow"
 
   gain_manager:
 
     estimator_types: [
       "open_vins",
       "gps_baro",
+      "vins_kickoff",
     ]
 
     # list of allowed gains per odometry mode
     allowed_gains:
       gps_baro: ["soft", "supersoft"]
       open_vins: ["soft", "supersoft"]
+      vins_kickoff: ["supersoft"]
 
     default_gains:
       gps_baro: "supersoft"
       open_vins: "supersoft"
+      vins_kickoff: "supersoft"
 
 mrs_uav_trackers:
 
