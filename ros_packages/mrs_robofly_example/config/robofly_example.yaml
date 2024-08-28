@@ -1,0 +1,6 @@
+frame_id: "fcu_untilted"
+
+timer_main:
+  rate: 1.0 # [Hz]
+
+distance: 3.0 # [m]
