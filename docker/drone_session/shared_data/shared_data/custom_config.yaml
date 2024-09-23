@@ -131,7 +131,6 @@ mrs_uav_managers:
 
         corrections: [
           "pos_vio",
-          "vel_hw_api"
         ]
 
         pos_vio:
@@ -146,24 +145,6 @@ mrs_uav_managers:
               time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
 
           processors: [] # types of processors attached to this measurement
-
-        vel_hw_api:
-          state_id: 1 # 0 - position, 1 - velocity, 2 - acceleration
-          noise: 1.0 # measurement noise covariance (R)
-          noise_unhealthy_coeff: 100.0 # covariance gets multiplied by this coefficient when correction is unhealthy (R)
-          message:
-            type: "geometry_msgs/Vector3Stamped"
-            topic: "hw_api/velocity" # without uav namespace
-            limit:
-              delay: 1.0 # [s] messages with higher delay will flag correction as unhealthy
-              time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
-
-          processors: [] # types of processors attached to this measurement
-
-          median_filter:
-            buffer_size: 20 # the number of samples from which the median is calculated
-            max_diff: 2.0 # [m] reject measurement if difference from median is over this value
-
 
       # namespace of the heading estimator
       hdg_open_vins: # namespace of the heading estimator

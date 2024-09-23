@@ -6,7 +6,7 @@ services:
 
   portainer:
 
-    image: portainer/portainer-ce:latest
+    image: portainer/portainer-ce:2.21.0
 
     ports:
       - 8000:8000
