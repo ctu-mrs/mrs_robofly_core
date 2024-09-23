@@ -55,7 +55,7 @@ services:
       - ./stack.env
     command: bash -c "waitForTime && roslaunch mrs_uav_px4_api api.launch"
 
-  core:
+  uav_core:
     image: ctumrs/mrs_uav_system:latest
     depends_on:
       - ros-time
@@ -66,7 +66,7 @@ services:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_deployment`/config/mrs_uav_system/$$UAV_TYPE.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_local.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
 
-  camera1:
+  vio_cam:
     image: ctumrs/mrs_uav_system:latest
     depends_on:
       - ros-time
@@ -80,7 +80,7 @@ services:
       - ./stack.env
     command: bash -c "waitForTime && roslaunch libcamera_ros_driver uav.launch custom_config:=/etc/ctu-mrs/shared_data/camera.yaml"
 
-  imu:
+  vio_imu:
     image: ctumrs/mrs_uav_system:latest
     depends_on:
       - ros-time
@@ -134,7 +134,7 @@ services:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_vins_republisher vins_republisher_openvins_unreal.launch"
+    command: bash -c "waitForHw && roslaunch mrs_vins_republisher vins_republisher_openvins_robofly.launch"
 
   rosbag:
     image: ctumrs/mrs_uav_system:latest
