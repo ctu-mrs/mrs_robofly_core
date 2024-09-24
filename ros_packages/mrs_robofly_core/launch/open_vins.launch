@@ -61,6 +61,13 @@
 
       </node>
 
+      <include file="$(find mrs_robofly_core)/launch/vins_republisher.launch">
+
+        <arg name="standalone" value="$(arg standalone)" />
+        <arg name="manager" value="$(arg manager)" />
+
+      </include>
+
     </group>
 
 </launch>
