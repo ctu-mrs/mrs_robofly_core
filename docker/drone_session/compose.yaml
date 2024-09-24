@@ -13,13 +13,13 @@ services:
     image: klaxalk:5000/robofly:shared_data
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
-    command: sh -c "rm -rf /etc/ctu-mrs/shared_data/*; mkdir -p /etc/ctu-mrs/shared_data; cp -r /etc/shared_data/* /etc/ctu-mrs/shared_data/"
+    command: sh -c "rm -rvf /etc/ctu-mrs/shared_data/*; mkdir -pv /etc/ctu-mrs/shared_data; cp -rv /etc/shared_data/* /etc/ctu-mrs/shared_data/"
 
   uav_configs:
     image: fly4future/uav_configs:robofly_00001
     volumes:
       - uav_configs:/etc/fly4future/uav_configs:consistent
-    command: sh -c "rm -rf /etc/fly4future/uav_configs/*; mkdir -p /etc/fly4future/uav_configs; cp -r /etc/uav_configs/* /etc/fly4future/uav_configs/"
+    command: sh -c "rm -rvf /etc/fly4future/uav_configs/*; mkdir -pv /etc/fly4future/uav_configs; cp -rv /etc/uav_configs/* /etc/fly4future/uav_configs/"
 
   ros-master:
     image: ctumrs/mrs_uav_system:robofly
@@ -72,7 +72,7 @@ services:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_uav_deployment`/config/mrs_uav_system/$$UAV_TYPE.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_local.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
+    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_robofly_core`/config/platform_config.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_local.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
 
   vio_cam:
     image: ctumrs/mrs_uav_system:robofly
@@ -81,12 +81,13 @@ services:
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - uav_configs:/etc/fly4future/uav_configs:consistent
     devices:
       - /dev/:/dev/
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch libcamera_ros_driver uav.launch standalone:=false config:=/etc/fly4future/uav_configs/camera_configs/down.yaml"
+    command: bash -c "waitForTime && roslaunch libcamera_ros_driver uav.launch standalone:=false camera_name:=down config:=/etc/fly4future/uav_configs/camera_params/down.yaml"
 
   vio_imu:
     image: ctumrs/mrs_uav_system:robofly
@@ -131,7 +132,7 @@ services:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_open_vins_core robofly.launch"
+    command: bash -c "waitForHw && roslaunch mrs_robofly_core open_vins.launch"
 
   rosbag:
     image: ctumrs/mrs_uav_system:robofly
@@ -157,6 +158,7 @@ services:
     volumes:
       - bag_files:/etc/bag_files:consistent
       - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - uav_configs:/etc/fly4future/uav_configs:consistent
       - /dev/:/dev/
     command:
       - bash --rcfile /opt/ros/noetic/setup.bash
