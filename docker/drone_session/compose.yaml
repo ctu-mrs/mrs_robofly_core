@@ -86,7 +86,7 @@ services:
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch libcamera_ros_driver uav.launch custom_config:=/etc/ctu-mrs/shared_data/camera.yaml"
+    command: bash -c "waitForTime && roslaunch libcamera_ros_driver uav.launch standalone:=false config:=/etc/fly4future/uav_configs/camera_configs/down.yaml"
 
   vio_imu:
     image: ctumrs/mrs_uav_system:robofly
@@ -132,17 +132,6 @@ services:
     env_file:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_open_vins_core robofly.launch"
-
-  open_vins_republisher:
-    image: ctumrs/mrs_uav_system:robofly
-    depends_on:
-      - ros-time
-    network_mode: host
-    volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
-    env_file:
-      - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_vins_republisher vins_republisher_openvins_robofly.launch"
 
   rosbag:
     image: ctumrs/mrs_uav_system:robofly
