@@ -1,10 +1,10 @@
 <launch>
 
-  <arg name="UAV_NAME" value="$(env UAV_NAME)" />
-  <arg name="name" value="down" />
-  <arg name="standalone" value="true" />
+  <arg name="UAV_NAME" default="$(env UAV_NAME)" />
+  <arg name="name" default="down" />
+  <arg name="standalone" default="true" />
 
-  <include file="$(find libcamera_ros_driver)/launch/uav.launch">
+  <include file="$(find libcamera_ros_driver)/launch/camera.launch">
 
     <arg name="camera_name" value="$(arg name)" />
     <arg name="standalone" value="$(arg standalone)" />
