@@ -1,0 +1,23 @@
+<launch>
+
+  <arg name="UAV_NAME" value="$(env UAV_NAME)" />
+  <arg name="name" value="down" />
+
+  <include file="$(find libcamera_ros_driver)/launch/uav.launch">
+
+    <arg name="camera_name" value="$(arg name)" />
+    <arg name="standalone" value="true" />
+    <arg name="config" value="$(dirname)/../camera_params/down.yaml" />
+
+  </include>
+
+  <include file="$(find mrs_sensor_info)/launch/sensor_info.launch">
+
+    <arg name="name" value="camera_down" />
+    <arg name="type" value="camera" />
+    <arg name="expected_rate" value="10" />
+    <arg name="topic" value="/$(arg UAV_NAME)/camera_$(arg name)/image_raw" />
+
+  </include>
+
+</launch>
