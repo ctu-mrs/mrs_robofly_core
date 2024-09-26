@@ -2,11 +2,12 @@
 
   <arg name="UAV_NAME" value="$(env UAV_NAME)" />
   <arg name="name" value="down" />
+  <arg name="standalone" value="true" />
 
   <include file="$(find libcamera_ros_driver)/launch/uav.launch">
 
     <arg name="camera_name" value="$(arg name)" />
-    <arg name="standalone" value="true" />
+    <arg name="standalone" value="$(arg standalone)" />
     <arg name="config" value="$(dirname)/../camera_params/down.yaml" />
 
   </include>
