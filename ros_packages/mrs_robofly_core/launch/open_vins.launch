@@ -70,4 +70,7 @@
 
   </include>
 
+  <include file="$(find mrs_icm_imu_driver)/launch/imu.launch">
+  </include>
+
 </launch>
