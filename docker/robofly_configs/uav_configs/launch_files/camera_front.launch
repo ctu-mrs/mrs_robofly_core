@@ -1,7 +1,7 @@
 <launch>
 
   <arg name="UAV_NAME" default="$(env UAV_NAME)" />
-  <arg name="name" default="down" />
+  <arg name="name" default="front" />
   <arg name="standalone" default="false" />
 
   <include file="$(find libcamera_ros_driver)/launch/camera.launch">

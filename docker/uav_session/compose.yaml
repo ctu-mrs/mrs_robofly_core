@@ -8,14 +8,15 @@ volumes:
 
 services:
 
-  # will copy data shared between containers form the shared_data container to the shared volume
-  shared_data:
+  # will copy session-specific data shared between containers form the shared_data container to the shared volume
+  copy_shared_data:
     image: klaxalk:5000/robofly:shared_data
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     command: sh -c "rm -rvf /etc/ctu-mrs/shared_data/*; mkdir -pv /etc/ctu-mrs/shared_data; cp -rv /etc/shared_data/* /etc/ctu-mrs/shared_data/"
 
-  uav_configs:
+  # will copy uav-specific configs, launch files and other from the uav-specific docker image
+  copy_uav_configs:
     image: fly4future/uav_configs:robofly_00001
     volumes:
       - uav_configs:/etc/fly4future/uav_configs:consistent
@@ -25,7 +26,8 @@ services:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
     depends_on:
-      - shared_data
+      - copy_shared_data
+      - copy_uav_configs
     env_file:
       - ./stack.env
     command: roscore
@@ -37,7 +39,7 @@ services:
       - ros-master
     env_file:
       - ./stack.env
-    command: bash -c "waitForRos && rosparam set use_sim_time false && read"
+    command: bash -c "waitForRos && rosparam set use_sim_time false"
 
   sensors:
     image: ctumrs/mrs_uav_system:robofly
@@ -74,7 +76,7 @@ services:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_robofly_core`/config/platform_config.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_local.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
 
-  vio_cam:
+  camera_down:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
       - ros-time
@@ -87,19 +89,22 @@ services:
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch libcamera_ros_driver uav.launch standalone:=false camera_name:=down config:=/etc/fly4future/uav_configs/camera_params/down.yaml"
+    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_configs/launch_files/camera_down.launch"
 
-  vio_imu:
+  camera_front:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
       - ros-time
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - uav_configs:/etc/fly4future/uav_configs:consistent
+    devices:
       - /dev/:/dev/
+    privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch mrs_icm_imu_driver imu.launch"
+    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_configs/launch_files/camera_front.launch"
 
   automatic_start:
     image: ctumrs/mrs_uav_system:robofly
@@ -130,6 +135,7 @@ services:
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - /dev/:/dev/
     env_file:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_robofly_core open_vins.launch"
@@ -150,8 +156,7 @@ services:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
     depends_on:
-      - shared_data
-      - uav_configs
+      - ros-time
     env_file:
       - ./stack.env
     entrypoint: ["/bin/bash", "-c"]
