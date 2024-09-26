@@ -18,9 +18,9 @@ exclude=(
 
 '(.*)bond'
 
-'(.*)camera_down/image_raw/(.*)'
+'(.*)camera_down(.*)'
 
-'(.*)camera_front/image_raw/(.*)'
+'(.*)camera_front(.*)'
 
 '(.*)ov_msckf(.*)'
 
