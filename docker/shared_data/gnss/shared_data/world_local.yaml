@@ -2,17 +2,17 @@ world_origin:
 
   units: "LATLON" # {"UTM, "LATLON"}
 
-  origin_x: 0.0
-  origin_y: 0.0
+  origin_x: 50.0764041
+  origin_y: 14.4180359
 
 safety_area:
 
-  enabled: false
+  enabled: true
 
   horizontal:
 
     # the frame of reference in which the points are expressed
-    frame_name: "fixed_origin"
+    frame_name: "local_origin"
 
     # polygon
     #
@@ -28,7 +28,7 @@ safety_area:
   vertical:
 
     # the frame of reference in which the max&min z is expressed
-    frame_name: "fixed_origin"
+    frame_name: "local_origin"
 
     max_z: 3.0
     min_z: 0.0

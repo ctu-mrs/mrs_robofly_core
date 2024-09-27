@@ -8,21 +8,25 @@ volumes:
 
 services:
 
-  # will copy session-specific data shared between containers form the shared_data container to the shared volume
+  # will copy session-specific data shared between containers from the shared_data container to a shared volume
   copy_shared_data:
-    image: klaxalk:5000/robofly:shared_data
+    image: fly4future/robofly:shared_data_vio
+    # image: fly4future/robofly:shared_data_gnss
+    # image: klaxalk:5000/robofly:shared_data_vio
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     command: sh -c "rm -rvf /etc/ctu-mrs/shared_data/*; mkdir -pv /etc/ctu-mrs/shared_data; cp -rv /etc/shared_data/* /etc/ctu-mrs/shared_data/"
 
-  # will copy uav-specific configs, launch files and other from the uav-specific docker image
+  # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
   copy_uav_configs:
-    image: fly4future/uav_configs:robofly_00001
+    image: fly4future/uav_configs:robofly_${ROBOFLY_ID}
     volumes:
       - uav_configs:/etc/fly4future/uav_configs:consistent
     command: sh -c "rm -rvf /etc/fly4future/uav_configs/*; mkdir -pv /etc/fly4future/uav_configs; cp -rv /etc/uav_configs/* /etc/fly4future/uav_configs/"
 
-  ros-master:
+  # starts roscore
+  # this is the first container in the ROS pipeline
+  roscore:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
     depends_on:
@@ -32,19 +36,23 @@ services:
       - ./stack.env
     command: roscore
 
-  ros-time:
+  # after roscore is started
+  # -> set a parameter that tells the system that simulation time is NOT used
+  # this container then stops
+  rostime:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
     depends_on:
-      - ros-master
+      - roscore
     env_file:
       - ./stack.env
     command: bash -c "waitForRos && rosparam set use_sim_time false"
 
-  sensors:
+  # starts the HW API for connecting the MRS UAV System to PX4
+  hw_api:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
-      - ros-time
+      - rostime
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
@@ -52,23 +60,26 @@ services:
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch mrs_uav_deployment sensors.launch"
+    command: bash -c "waitForTime && roslaunch mrs_uav_px4_api api.launch"
 
-  hw_api:
+  # starts the open_vins visual inertial odometry
+  open_vins:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
-      - ros-time
+      - rostime
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - /dev/:/dev/
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch mrs_uav_px4_api api.launch"
+    command: bash -c "waitForHw && roslaunch mrs_robofly_core open_vins.launch verbosity:=INFO"
 
+  # starts the MRS UAV System's core
   uav_core:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
-      - ros-time
+      - rostime
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
@@ -76,10 +87,11 @@ services:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_robofly_core`/config/platform_config.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_local.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
 
-  camera_down:
+  # starts the camera drivers
+  cameras:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
-      - ros-time
+      - rostime
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
@@ -89,27 +101,13 @@ services:
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_configs/launch_files/camera_down.launch"
+    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_configs/launch_files/cameras.launch"
 
-  camera_front:
-    image: ctumrs/mrs_uav_system:robofly
-    depends_on:
-      - ros-time
-    network_mode: host
-    volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
-      - uav_configs:/etc/fly4future/uav_configs:consistent
-    devices:
-      - /dev/:/dev/
-    privileged: true
-    env_file:
-      - ./stack.env
-    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_configs/launch_files/camera_front.launch"
-
+  # starts the node that handles automatic initialization of the system and takeoff
   automatic_start:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
-      - ros-time
+      - rostime
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
@@ -117,33 +115,11 @@ services:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
 
-  uav_status:
-    image: ctumrs/mrs_uav_system:robofly
-    depends_on:
-      - ros-time
-    network_mode: host
-    volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
-    env_file:
-      - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_uav_status acquisition.launch"
-
-  open_vins:
-    image: ctumrs/mrs_uav_system:robofly
-    depends_on:
-      - ros-time
-    network_mode: host
-    volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
-      - /dev/:/dev/
-    env_file:
-      - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_robofly_core open_vins.launch"
-
+  # starts `rosbag record`
   rosbag:
     image: ctumrs/mrs_uav_system:robofly
     depends_on:
-      - ros-time
+      - rostime
     network_mode: host
     volumes:
       - bag_files:/etc/bag_files:consistent
@@ -152,11 +128,12 @@ services:
       - ./stack.env
     command: bash -c "waitForTime && /etc/ctu-mrs/shared_data/record.sh"
 
+  # this container can be used to access a terminal with ROS inside the compose session
   terminal:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
     depends_on:
-      - ros-time
+      - rostime
     env_file:
       - ./stack.env
     entrypoint: ["/bin/bash", "-c"]

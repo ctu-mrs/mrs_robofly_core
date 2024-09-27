@@ -6,7 +6,7 @@ camera_name: "imx296" # if the camera_name is not defined, the id is used
 camera_id: 10
 stream_role: "still" # [raw, still, video, viewfinder]
 
-pixel_format: "RGB888" #pixel format documentation: https://libcamera.org/api-html/build_2include_2libcamera_2formats_8h_source.html
+pixel_format: "XRGB8888" # pixel format documentation: https://libcamera.org/api-html/build_2include_2libcamera_2formats_8h_source.html
 
 resolution:
   width: 1456
@@ -22,7 +22,7 @@ use_ros_time: true #If set to true, the time stamps of the output camera images 
 # documentation: https://libcamera.org/api-html/namespacelibcamera_1_1controls.html
 
 control:
-  fps: 30 # [Hz] Note: fps is set as 1000000/frame_duration_limits
+  fps: 1 # [Hz] Note: fps is set as 1000000/frame_duration_limits
   # exposure_time: 20 # Exposure time (shutter speed) for the frame applied in the sensor device. This value is specified in micro-seconds.
   # stats_output_enable - not supported by the current version of the libcamera SDK
   # noise_reduction_mode - not supported by the current version of the libcamera SDK

@@ -16,11 +16,7 @@ exclude=(
 # ROS communication hiccups, which can lead to eland, failsafe
 # or just a CRASH.
 
-'(.*)bond'
-
-'(.*)camera_down(.*)'
-
-'(.*)camera_front(.*)'
+'(.*)camera_(.*)'
 
 '(.*)ov_msckf(.*)'
 
@@ -41,6 +37,7 @@ exclude=(
 
 '(.*)mpc_tracker/string'
 
+'(.*)bond'
 )
 
 # file's header

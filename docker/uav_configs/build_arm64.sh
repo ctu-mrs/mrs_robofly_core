@@ -1,6 +1,10 @@
 #!/bin/bash
 
-LOCAL_TAG=uav_configs:robofly_00001
+ROBOFLY=c4750f
+
+ln -s $ROBOFLY current
+
+LOCAL_TAG=uav_configs:robofly_$ROBOFLY
 REGISTRY=fly4future
 
 docker buildx create --name container --driver=docker-container
