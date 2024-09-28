@@ -22,7 +22,7 @@ use_ros_time: true #If set to true, the time stamps of the output camera images 
 # documentation: https://libcamera.org/api-html/namespacelibcamera_1_1controls.html
 
 control:
-  fps: 1 # [Hz] Note: fps is set as 1000000/frame_duration_limits
+  fps: 30 # [Hz] Note: fps is set as 1000000/frame_duration_limits
   # exposure_time: 20 # Exposure time (shutter speed) for the frame applied in the sensor device. This value is specified in micro-seconds.
   # stats_output_enable - not supported by the current version of the libcamera SDK
   # noise_reduction_mode - not supported by the current version of the libcamera SDK

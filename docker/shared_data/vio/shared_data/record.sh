@@ -16,7 +16,11 @@ exclude=(
 # ROS communication hiccups, which can lead to eland, failsafe
 # or just a CRASH.
 
-'(.*)camera_(.*)'
+# don't record raw images
+'(.*)camera_(.*)/image_raw'
+
+# don't record compressed images
+# '(.*)camera_(.*)/image_raw/compressed'
 
 '(.*)ov_msckf(.*)'
 
