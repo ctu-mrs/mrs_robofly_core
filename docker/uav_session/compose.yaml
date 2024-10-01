@@ -2,7 +2,7 @@ volumes:
 
   shared_data:
 
-  uav_configs:
+  uav_custom_files:
 
   bag_files:
 
@@ -18,11 +18,11 @@ services:
     command: sh -c "rm -rvf /etc/ctu-mrs/shared_data/*; mkdir -pv /etc/ctu-mrs/shared_data; cp -rv /etc/shared_data/* /etc/ctu-mrs/shared_data/"
 
   # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
-  copy_uav_configs:
-    image: fly4future/uav_configs:robofly_${ROBOFLY_ID}
+  copy_uav_custom_files:
+    image: fly4future/uav_custom_files:latest
     volumes:
-      - uav_configs:/etc/fly4future/uav_configs:consistent
-    command: sh -c "rm -rvf /etc/fly4future/uav_configs/*; mkdir -pv /etc/fly4future/uav_configs; cp -rv /etc/uav_configs/* /etc/fly4future/uav_configs/"
+      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
+    command: sh -c "rm -rvf /etc/fly4future/uav_custom_files/*; mkdir -pv /etc/fly4future/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${ROBOFLY_ID}/* /etc/fly4future/uav_custom_files/"
 
   # starts roscore
   # this is the first container in the ROS pipeline
@@ -31,7 +31,7 @@ services:
     network_mode: host
     depends_on:
       - copy_shared_data
-      - copy_uav_configs
+      - copy_uav_custom_files
     env_file:
       - ./stack.env
     command: roscore
@@ -95,13 +95,13 @@ services:
     network_mode: host
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
-      - uav_configs:/etc/fly4future/uav_configs:consistent
+      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
     devices:
       - /dev/:/dev/
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_configs/launch_files/cameras.launch"
+    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_custom_files/launch_files/cameras.launch"
 
   # starts the node that handles automatic initialization of the system and takeoff
   automatic_start:
@@ -140,7 +140,7 @@ services:
     volumes:
       - bag_files:/etc/bag_files:consistent
       - shared_data:/etc/ctu-mrs/shared_data:consistent
-      - uav_configs:/etc/fly4future/uav_configs:consistent
+      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
       - /dev/:/dev/
     command:
       - bash --rcfile /opt/ros/noetic/setup.bash

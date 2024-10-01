@@ -1,2 +1,2 @@
-docker compose down -v --remove-orphans
+docker compose down --remove-orphans
 docker network prune -f
