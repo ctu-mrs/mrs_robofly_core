@@ -22,7 +22,7 @@ services:
     image: fly4future/uav_custom_files:latest
     volumes:
       - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
-    command: sh -c "rm -rvf /etc/fly4future/uav_custom_files/*; mkdir -pv /etc/fly4future/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${ROBOFLY_ID}/* /etc/fly4future/uav_custom_files/"
+    command: sh -c "rm -rvf /etc/fly4future/uav_custom_files/*; mkdir -pv /etc/fly4future/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /etc/fly4future/uav_custom_files/"
 
   # starts roscore
   # this is the first container in the ROS pipeline
