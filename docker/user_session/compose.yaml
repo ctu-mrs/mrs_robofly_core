@@ -1,0 +1,9 @@
+services:
+
+  # starts the HW API for connecting the MRS UAV System to PX4
+  robofly_example:
+    image: ctumrs/mrs_uav_system:robofly
+    network_mode: host
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForRos && roslaunch mrs_robofly_example robofly_example.launch"
