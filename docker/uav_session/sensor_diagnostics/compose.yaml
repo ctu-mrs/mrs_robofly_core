@@ -1,0 +1,69 @@
+volumes:
+
+  uav_custom_files:
+
+services:
+
+  # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
+  copy_uav_custom_files:
+    image: fly4future/uav_custom_files:latest
+    volumes:
+      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
+    command: sh -c "rm -rvf /etc/fly4future/uav_custom_files/*; mkdir -pv /etc/fly4future/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /etc/fly4future/uav_custom_files/"
+
+  # starts roscore
+  # this is the first container in the ROS pipeline
+  roscore:
+    image: ctumrs/mrs_uav_system:robofly
+    network_mode: host
+    depends_on:
+      - copy_uav_custom_files
+    env_file:
+      - ./stack.env
+    command: roscore
+
+  # starts the HW API for connecting the MRS UAV System to PX4
+  hw_api:
+    image: ctumrs/mrs_uav_system:robofly
+    depends_on:
+      - rostime
+    network_mode: host
+    volumes:
+      - /dev/:/dev/
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForTime && roslaunch mrs_uav_px4_api api.launch"
+
+  # starts the camera drivers
+  cameras:
+    image: ctumrs/mrs_uav_system:robofly
+    depends_on:
+      - rostime
+    network_mode: host
+    volumes:
+      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
+    devices:
+      - /dev/:/dev/
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_custom_files/launch_files/cameras.launch"
+
+  # this container can be used to access a terminal with ROS inside the compose session
+  terminal:
+    image: ctumrs/mrs_uav_system:robofly
+    network_mode: host
+    depends_on:
+      - rostime
+    env_file:
+      - ./stack.env
+    entrypoint: ["/bin/bash", "-c"]
+    volumes:
+      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
+      - /dev/:/dev/
+    command:
+      - bash --rcfile /opt/ros/noetic/setup.bash
+    privileged: true
+    stdin_open: true
+    tty: true
