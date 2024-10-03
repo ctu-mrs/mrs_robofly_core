@@ -25,8 +25,6 @@ services:
   # starts the HW API for connecting the MRS UAV System to PX4
   hw_api:
     image: ctumrs/mrs_uav_system:robofly
-    depends_on:
-      - rostime
     network_mode: host
     volumes:
       - /dev/:/dev/
@@ -38,8 +36,6 @@ services:
   # starts the camera drivers
   cameras:
     image: ctumrs/mrs_uav_system:robofly
-    depends_on:
-      - rostime
     network_mode: host
     volumes:
       - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
@@ -54,8 +50,6 @@ services:
   terminal:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
-    depends_on:
-      - rostime
     env_file:
       - ./stack.env
     entrypoint: ["/bin/bash", "-c"]
