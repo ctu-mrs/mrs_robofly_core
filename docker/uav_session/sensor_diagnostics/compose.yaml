@@ -31,7 +31,7 @@ services:
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch mrs_uav_px4_api api.launch"
+    command: bash -c "waitForRos && roslaunch mrs_uav_px4_api api.launch"
 
   # starts the camera drivers
   cameras:
@@ -44,7 +44,7 @@ services:
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_custom_files/launch_files/cameras.launch"
+    command: bash -c "waitForRos && roslaunch /etc/fly4future/uav_custom_files/launch_files/cameras.launch"
 
   # this container can be used to access a terminal with ROS inside the compose session
   terminal:
