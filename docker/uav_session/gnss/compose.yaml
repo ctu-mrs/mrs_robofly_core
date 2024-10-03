@@ -62,8 +62,6 @@ services:
       - ./stack.env
     command: bash -c "waitForTime && roslaunch mrs_uav_px4_api api.launch"
 
-
-
   # starts the MRS UAV System's core
   uav_core:
     image: ctumrs/mrs_uav_system:robofly
