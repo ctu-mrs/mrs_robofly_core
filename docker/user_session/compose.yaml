@@ -1,9 +1,42 @@
+volumes:
+
+  catkin_workspace:
+
 services:
 
+  # will copy user's ROS catkin workspace from the 'transfer' alpine image to a shared volume
+  copy_catkin_workspace:
+    image: robofly:custom_package
+    volumes:
+      - catkin_workspace:/tmp/catkin_workspace:consistent
+    command: sh -c "rm -rvf /tmp/catkin_workspace/*; mkdir -pv /tmp/catkin_workspace; cp -rv /etc/catkin_workspace/* /tmp/catkin_workspace/"
+
   # starts the HW API for connecting the MRS UAV System to PX4
-  robofly_example:
+  custom_package:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
+    depends_on:
+      - copy_catkin_workspace
+    volumes:
+      - catkin_workspace:/etc/catkin_workspace:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForRos && roslaunch mrs_robofly_example robofly_example.launch"
+    command: bash -c "source /etc/catkin_workspace/devel/setup.bash && waitForRos && roslaunch mrs_circle_flier test.launch"
+
+  # this container can be used to access a terminal with ROS inside the compose session
+  terminal:
+    image: ctumrs/mrs_uav_system:robofly
+    network_mode: host
+    depends_on:
+      - copy_catkin_workspace
+    env_file:
+      - ./stack.env
+    entrypoint: ["/bin/bash", "-c"]
+    volumes:
+      - catkin_workspace:/etc/catkin_workspace:consistent
+      - /dev/:/dev/
+    command:
+      - bash --rcfile /etc/catkin_workspace/devel/setup.bash
+    privileged: true
+    stdin_open: true
+    tty: true

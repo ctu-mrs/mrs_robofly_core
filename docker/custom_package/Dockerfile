@@ -30,10 +30,16 @@ COPY --from=stage_build /${WORKSPACE_PATH} /${WORKSPACE_PATH}
 #############################################################################
 
 # THIRD STAGE: copy the workspace to a final blank ROS-equipped base image
-FROM $BASE_IMAGE AS stage_finalization
+FROM alpine AS stage_finalization
 
 ARG WORKSPACE_PATH
 
-COPY --from=stage_cache_workspace /${WORKSPACE_PATH} /${WORKSPACE_PATH}
+COPY ./cache/${WORKSPACE_PATH}/src /${WORKSPACE_PATH}/src
+COPY ./cache/${WORKSPACE_PATH}/.catkin_tools /${WORKSPACE_PATH}/.catkin_tools
+COPY ./cache/${WORKSPACE_PATH}/devel /${WORKSPACE_PATH}/devel
+
+# COPY --from=stage_cache_workspace /${WORKSPACE_PATH}/src /${WORKSPACE_PATH}/src
+# COPY --from=stage_cache_workspace /${WORKSPACE_PATH}/.catkin_tools /${WORKSPACE_PATH}/.catkin_tools
+# COPY --from=stage_cache_workspace /${WORKSPACE_PATH}/devel /${WORKSPACE_PATH}/devel
 
 CMD ["bash"]
