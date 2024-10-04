@@ -6,7 +6,7 @@ services:
 
   # will copy user's ROS catkin workspace from the 'transfer' alpine image to a shared volume
   copy_catkin_workspace:
-    image: robofly:custom_package
+    image: custom_package:1.0.0
     volumes:
       - catkin_workspace:/tmp/catkin_workspace:consistent
     command: sh -c "rm -rvf /tmp/catkin_workspace/*; mkdir -pv /tmp/catkin_workspace; cp -rv /etc/catkin_workspace/* /tmp/catkin_workspace/"
