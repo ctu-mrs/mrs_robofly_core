@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOCAL_TAG=robofly:custom_package
+LOCAL_TAG=custom_package:1.0.0
 
 ARCH=arm64
 # ARCH=amd64

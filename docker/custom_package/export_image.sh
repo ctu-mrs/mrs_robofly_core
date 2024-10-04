@@ -1,5 +1,5 @@
 #!/bin/bash
 
-LOCAL_TAG=robofly:custom_package
+LOCAL_TAG=custom_package:1.0.0
 
-docker save $LOCAL_TAG --output ~/docker/custom_package.tar
+docker save $LOCAL_TAG --output custom_package.tar
