@@ -2,6 +2,8 @@ volumes:
 
   uav_custom_files:
 
+  bag_files:
+
 services:
 
   # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
@@ -56,6 +58,7 @@ services:
     volumes:
       - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
       - /dev/:/dev/
+      - bag_files:/etc/bag_files:consistent
     command:
       - bash --rcfile /opt/ros/noetic/setup.bash
     privileged: true
