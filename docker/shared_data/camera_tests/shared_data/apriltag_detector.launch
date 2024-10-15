@@ -9,7 +9,7 @@
 
   <arg name="custom_config" default="" />
 
-  <group ns="$(arg camera_node)">
+  <group ns="$(arg UAV_NAME)/$(arg camera_node)">
 
     <!-- apriltag_ros continuous detection node -->
     <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag_detector" clear_params="true" output="screen">
@@ -19,8 +19,8 @@
       <rosparam if="$(eval not arg('custom_config') == '')" file="$(arg custom_config)" />
 
       <!-- Remap topics from those used in code to those on the ROS network -->
-      <remap from="image_rect" to="$(arg camera_node)/$(arg image_topic)" />
-      <remap from="camera_info" to="$(arg camera_node)/camera_info" />
+      <remap from="image_rect" to="$(arg image_topic)" />
+      <remap from="camera_info" to="camera_info" />
 
       <remap from="tag_detections" to="~/tag_detections" />
       <remap from="tag_detections_image" to="~/tag_detections_image" />

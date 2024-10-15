@@ -1,6 +1,10 @@
 volumes:
 
+  uav_custom_files:
+
   shared_data:
+
+  bag_files:
 
 services:
 
@@ -11,7 +15,37 @@ services:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
     command: sh -c "rm -rvf /etc/ctu-mrs/shared_data/*; mkdir -pv /etc/ctu-mrs/shared_data; cp -rv /etc/shared_data/* /etc/ctu-mrs/shared_data/"
 
-  # starts the HW API for connecting the MRS UAV System to PX4
+  # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
+  copy_uav_custom_files:
+    image: fly4future/uav_custom_files:latest
+    volumes:
+      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
+    command: sh -c "rm -rvf /etc/fly4future/uav_custom_files/*; mkdir -pv /etc/fly4future/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /etc/fly4future/uav_custom_files/"
+
+  # starts roscore
+  # this is the first container in the ROS pipeline
+  roscore:
+    image: ctumrs/mrs_uav_system:robofly
+    network_mode: host
+    depends_on:
+      - copy_uav_custom_files
+    env_file:
+      - ./stack.env
+    command: roscore
+
+  # starts the camera drivers
+  cameras:
+    image: ctumrs/mrs_uav_system:robofly
+    network_mode: host
+    volumes:
+      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
+    devices:
+      - /dev/:/dev/
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForRos && roslaunch /etc/fly4future/uav_custom_files/launch_files/cameras.launch"
+
   apriltag_bottom:
     image: ctumrs/mrs_uav_system:robofly
     network_mode: host
@@ -35,6 +69,7 @@ services:
     volumes:
       - shared_data:/etc/ctu-mrs/shared_data:consistent
       - /dev/:/dev/
+      - bag_files:/etc/bag_files:consistent
     command:
       - bash --rcfile /etc/catkin_workspace/devel/setup.bash
     privileged: true
