@@ -14,15 +14,15 @@ services:
     image: fly4future/robofly:shared_data_gnss
     # image: klaxalk:5000/robofly:shared_data_vio
     volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
-    command: sh -c "rm -rvf /etc/ctu-mrs/shared_data/*; mkdir -pv /etc/ctu-mrs/shared_data; cp -rv /etc/shared_data/* /etc/ctu-mrs/shared_data/"
+      - shared_data:/etc/docker/shared_data:consistent
+    command: sh -c "rm -rvf /etc/docker/shared_data/*; mkdir -pv /etc/docker/shared_data; cp -rv /etc/shared_data/* /etc/docker/shared_data/"
 
   # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
   copy_uav_custom_files:
     image: fly4future/uav_custom_files:latest
     volumes:
-      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
-    command: sh -c "rm -rvf /etc/fly4future/uav_custom_files/*; mkdir -pv /etc/fly4future/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /etc/fly4future/uav_custom_files/"
+      - uav_custom_files:/etc/docker/uav_custom_files:consistent
+    command: sh -c "rm -rvf /etc/docker/uav_custom_files/*; mkdir -pv /etc/docker/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /etc/docker/uav_custom_files/"
 
   # starts roscore
   # this is the first container in the ROS pipeline
@@ -55,7 +55,7 @@ services:
       - rostime
     network_mode: host
     volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - shared_data:/etc/docker/shared_data:consistent
       - /dev/:/dev/
     privileged: true
     env_file:
@@ -69,10 +69,10 @@ services:
       - rostime
     network_mode: host
     volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - shared_data:/etc/docker/shared_data:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_robofly_core`/config/platform_config.yaml custom_config:=/etc/ctu-mrs/shared_data/custom_config.yaml world_config:=/etc/ctu-mrs/shared_data/world_local.yaml network_config:=/etc/ctu-mrs/shared_data/network_config.yaml"
+    command: bash -c "waitForHw && roslaunch mrs_uav_core core.launch platform_config:=`rospack find mrs_robofly_core`/config/platform_config.yaml custom_config:=/etc/docker/shared_data/custom_config.yaml world_config:=/etc/docker/shared_data/world_local.yaml network_config:=/etc/docker/shared_data/network_config.yaml"
 
   # starts the camera drivers
   cameras:
@@ -81,14 +81,14 @@ services:
       - rostime
     network_mode: host
     volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
-      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
+      - shared_data:/etc/docker/shared_data:consistent
+      - uav_custom_files:/etc/docker/uav_custom_files:consistent
     devices:
       - /dev/:/dev/
     privileged: true
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && roslaunch /etc/fly4future/uav_custom_files/launch_files/cameras.launch"
+    command: bash -c "waitForTime && roslaunch /etc/docker/uav_custom_files/launch_files/cameras.launch"
 
   # starts the node that handles automatic initialization of the system and takeoff
   automatic_start:
@@ -97,7 +97,7 @@ services:
       - rostime
     network_mode: host
     volumes:
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - shared_data:/etc/docker/shared_data:consistent
     env_file:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
@@ -110,10 +110,10 @@ services:
     network_mode: host
     volumes:
       - bag_files:/etc/bag_files:consistent
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
+      - shared_data:/etc/docker/shared_data:consistent
     env_file:
       - ./stack.env
-    command: bash -c "waitForTime && /etc/ctu-mrs/shared_data/record.sh"
+    command: bash -c "waitForTime && /etc/docker/shared_data/record.sh"
 
   # this container can be used to access a terminal with ROS inside the compose session
   terminal:
@@ -126,8 +126,8 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     volumes:
       - bag_files:/etc/bag_files:consistent
-      - shared_data:/etc/ctu-mrs/shared_data:consistent
-      - uav_custom_files:/etc/fly4future/uav_custom_files:consistent
+      - shared_data:/etc/docker/shared_data:consistent
+      - uav_custom_files:/etc/docker/uav_custom_files:consistent
       - /dev/:/dev/
     command:
       - bash --rcfile /opt/ros/noetic/setup.bash

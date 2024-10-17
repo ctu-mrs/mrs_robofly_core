@@ -1,5 +1,5 @@
 ARG WORKSPACE_PATH
-ARG BASE_IMAGE=ctumrs/mrs_uav_system:latest
+ARG BASE_IMAGE=ctumrs/mrs_uav_system:robofly
 
 #############################################################################
 
@@ -37,9 +37,5 @@ ARG WORKSPACE_PATH
 COPY ./cache/${WORKSPACE_PATH}/src /${WORKSPACE_PATH}/src
 COPY ./cache/${WORKSPACE_PATH}/.catkin_tools /${WORKSPACE_PATH}/.catkin_tools
 COPY ./cache/${WORKSPACE_PATH}/devel /${WORKSPACE_PATH}/devel
-
-# COPY --from=stage_cache_workspace /${WORKSPACE_PATH}/src /${WORKSPACE_PATH}/src
-# COPY --from=stage_cache_workspace /${WORKSPACE_PATH}/.catkin_tools /${WORKSPACE_PATH}/.catkin_tools
-# COPY --from=stage_cache_workspace /${WORKSPACE_PATH}/devel /${WORKSPACE_PATH}/devel
 
 CMD ["bash"]
