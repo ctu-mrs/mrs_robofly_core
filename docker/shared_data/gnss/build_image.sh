@@ -15,16 +15,20 @@ cd ${MY_PATH}
 ## |                            setup                           |
 ## --------------------------------------------------------------
 
-LOCAL_TAG=user_workspace:1.0.0
-EXPORT_PATH=~/docker
+LOCAL_TAG=robofly:shared_data_gnss
+REGISTRY=fly4future
+
+ARCH=arm64 # robofly
+# ARCH=amd64
 
 ## --------------------------------------------------------------
-## |                           export                           |
+## |                            build                           |
 ## --------------------------------------------------------------
 
-docker save ${LOCAL_TAG} | gzip > ${EXPORT_PATH}/${LOCAL_TAG}.tar.gz
+docker buildx use default
+
+docker buildx build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=linux/${ARCH}
 
 echo ""
-echo "$0: image exorted as ${EXPORT_PATH}/${LOCAL_TAG}.tar.gz"
+echo "$0: shared data were packed into '$LOCAL_TAG'"
 echo ""
-

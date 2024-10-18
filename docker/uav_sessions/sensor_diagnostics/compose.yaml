@@ -8,10 +8,10 @@ services:
 
   # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
   copy_uav_custom_files:
-    image: fly4future/uav_custom_files:latest
+    image: fly4future/uav_custom_files
     volumes:
-      - uav_custom_files:/etc/docker/uav_custom_files:consistent
-    command: sh -c "rm -rvf /etc/docker/uav_custom_files/*; mkdir -pv /etc/docker/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /etc/docker/uav_custom_files/"
+      - uav_custom_files:/tmp/docker/uav_custom_files:consistent
+    command: sh -c "rm -rvf /tmp/docker/uav_custom_files/*; mkdir -pv /tmp/docker/uav_custom_files; cp -rv /etc/docker/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /tmp/docker/uav_custom_files/"
 
   # starts roscore
   # this is the first container in the ROS pipeline
@@ -60,7 +60,7 @@ services:
     volumes:
       - uav_custom_files:/etc/docker/uav_custom_files:consistent
       - /dev/:/dev/
-      - bag_files:/etc/bag_files:consistent
+      - bag_files:/etc/docker/bag_files:consistent
     command:
       - bash --rcfile /opt/ros/noetic/setup.bash
     privileged: true

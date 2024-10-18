@@ -10,19 +10,17 @@ services:
 
   # will copy session-specific data shared between containers from the shared_data container to a shared volume
   copy_shared_data:
-    # image: fly4future/robofly:shared_data_vio
-    image: fly4future/robofly:shared_data_gnss
-    # image: klaxalk:5000/robofly:shared_data_vio
+    image: fly4future/robofly:shared_data_vio
     volumes:
-      - shared_data:/etc/docker/shared_data:consistent
-    command: sh -c "rm -rvf /etc/docker/shared_data/*; mkdir -pv /etc/docker/shared_data; cp -rv /etc/shared_data/* /etc/docker/shared_data/"
+      - shared_data:/tmp/docker/shared_data:consistent
+    command: sh -c "rm -rvf /tmp/docker/shared_data/*; mkdir -pv /tmp/docker/shared_data; cp -rv /etc/docker/shared_data/* /tmp/docker/shared_data/"
 
   # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
   copy_uav_custom_files:
-    image: fly4future/uav_custom_files:latest
+    image: fly4future/uav_custom_files
     volumes:
-      - uav_custom_files:/etc/docker/uav_custom_files:consistent
-    command: sh -c "rm -rvf /etc/docker/uav_custom_files/*; mkdir -pv /etc/docker/uav_custom_files; cp -rv /etc/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /etc/docker/uav_custom_files/"
+      - uav_custom_files:/tmp/docker/uav_custom_files:consistent
+    command: sh -c "rm -rvf /tmp/docker/uav_custom_files/*; mkdir -pv /tmp/docker/uav_custom_files; cp -rv /etc/docker/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /tmp/docker/uav_custom_files/"
 
   # starts roscore
   # this is the first container in the ROS pipeline
@@ -109,7 +107,7 @@ services:
       - rostime
     network_mode: host
     volumes:
-      - bag_files:/etc/bag_files:consistent
+      - bag_files:/etc/docker/bag_files:consistent
       - shared_data:/etc/docker/shared_data:consistent
     env_file:
       - ./stack.env
@@ -125,7 +123,7 @@ services:
       - ./stack.env
     entrypoint: ["/bin/bash", "-c"]
     volumes:
-      - bag_files:/etc/bag_files:consistent
+      - bag_files:/etc/docker/bag_files:consistent
       - shared_data:/etc/docker/shared_data:consistent
       - uav_custom_files:/etc/docker/uav_custom_files:consistent
       - /dev/:/dev/
