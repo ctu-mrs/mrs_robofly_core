@@ -25,7 +25,7 @@ services:
   # starts roscore
   # this is the first container in the ROS pipeline
   roscore:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     network_mode: host
     depends_on:
       - copy_shared_data
@@ -38,7 +38,7 @@ services:
   # -> set a parameter that tells the system that simulation time is NOT used
   # this container then stops
   rostime:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     network_mode: host
     depends_on:
       - roscore
@@ -48,7 +48,7 @@ services:
 
   # starts the HW API for connecting the MRS UAV System to PX4
   hw_api:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     depends_on:
       - rostime
     network_mode: host
@@ -62,7 +62,7 @@ services:
 
   # starts the open_vins visual inertial odometry
   open_vins:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     depends_on:
       - rostime
     network_mode: host
@@ -75,7 +75,7 @@ services:
 
   # starts the MRS UAV System's core
   uav_core:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     depends_on:
       - rostime
     network_mode: host
@@ -87,7 +87,7 @@ services:
 
   # starts the camera drivers
   cameras:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     depends_on:
       - rostime
     network_mode: host
@@ -103,7 +103,7 @@ services:
 
   # starts the node that handles automatic initialization of the system and takeoff
   automatic_start:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     depends_on:
       - rostime
     network_mode: host
@@ -115,7 +115,7 @@ services:
 
   # starts `rosbag record`
   rosbag:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     depends_on:
       - rostime
     network_mode: host
@@ -128,7 +128,7 @@ services:
 
   # this container can be used to access a terminal with ROS inside the compose session
   terminal:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     network_mode: host
     depends_on:
       - rostime

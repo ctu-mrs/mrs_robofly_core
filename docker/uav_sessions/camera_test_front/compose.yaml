@@ -25,7 +25,7 @@ services:
   # starts roscore
   # this is the first container in the ROS pipeline
   roscore:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     network_mode: host
     depends_on:
       - copy_uav_custom_files
@@ -35,7 +35,7 @@ services:
 
   # starts the camera drivers
   cameras:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     network_mode: host
     volumes:
       - uav_custom_files:/etc/docker/uav_custom_files:consistent
@@ -47,7 +47,7 @@ services:
     command: bash -c "waitForRos && roslaunch /etc/docker/uav_custom_files/launch_files/cameras.launch throttled_rate:=5"
 
   apriltag_front:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     network_mode: host
     depends_on:
       - copy_shared_data
@@ -59,7 +59,7 @@ services:
 
   # this container can be used to access a terminal with ROS inside the compose session
   terminal:
-    image: ctumrs/mrs_uav_system:robofly
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
     network_mode: host
     depends_on:
       - copy_shared_data

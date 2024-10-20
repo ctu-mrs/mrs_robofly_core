@@ -1,5 +1,5 @@
 ARG WORKSPACE_PATH
-ARG BASE_IMAGE=ctumrs/mrs_uav_system:robofly
+ARG BASE_IMAGE=ctumrs/mrs_uav_system:1.5.0
 
 #############################################################################
 
