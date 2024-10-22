@@ -38,4 +38,4 @@ COPY ./cache/${WORKSPACE_PATH}/src /${WORKSPACE_PATH}/src
 COPY ./cache/${WORKSPACE_PATH}/.catkin_tools /${WORKSPACE_PATH}/.catkin_tools
 COPY ./cache/${WORKSPACE_PATH}/devel /${WORKSPACE_PATH}/devel
 
-CMD ["bash"]
+CMD ["sh"]

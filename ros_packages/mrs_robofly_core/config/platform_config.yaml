@@ -10,6 +10,14 @@ motor_params:
 
 mrs_uav_managers:
 
+  uav_manager:
+
+    landing:
+
+      # those two must apply simultaneously
+      landing_cutoff_mass_factor:  0.75 # how much lighter does the drone appear to be?
+      landing_cutoff_timeout:  0.5 # [s] how long does the throttle has to be below the mass factor
+
   control_manager:
 
     Se3Controller:
@@ -22,6 +30,14 @@ mrs_uav_managers:
       horizontal_speed: 3.00 # [m/s]
       vertical_speed: 2.00 # [m/s]
       heading_rate: 2.0 # [rad/s]
+
+    safety:
+
+      # emergency landing (still feedback)
+      eland:
+
+        cutoff_mass_factor:  0.75 # how much lighter does the drone appear to be?
+        cutoff_timeout:  0.5 # [s] how long does the throttle has to be below the mass factor
 
   estimation_manager:
 
@@ -239,22 +255,6 @@ mrs_uav_managers:
               time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
 
           processors: [] # types of processors attached to this measurement
-
-  uav_manager:
-
-    takeoff:
-
-      during_takeoff:
-        controller: "Se3Controller"
-
-      after_takeoff:
-        controller: "Se3Controller"
-
-      takeoff_height: 1.5
-
-    midair_activation:
-      after_activation:
-        controller: "Se3Controller"
 
   transform_manager:
 

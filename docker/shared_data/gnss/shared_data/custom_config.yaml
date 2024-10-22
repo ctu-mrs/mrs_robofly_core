@@ -9,3 +9,13 @@ mrs_uav_managers:
     ]
 
     initial_state_estimator: "gps_baro" # will be used as the first state estimator
+
+  uav_manager:
+
+    takeoff:
+
+      during_takeoff:
+        controller: "MpcController"
+
+      after_takeoff:
+        controller: "MpcController"

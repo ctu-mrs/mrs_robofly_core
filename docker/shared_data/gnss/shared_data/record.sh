@@ -19,6 +19,8 @@ exclude=(
 # don't record cameras
 '(.*)camera_(.*)'
 
+'(.*)apriltag(.*)'
+
 '(.*)ov_msckf(.*)'
 
 '(.*)mavros(.*)'
