@@ -100,8 +100,6 @@ services:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
 
-
-
   # starts `rosbag record`
   rosbag:
     image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}

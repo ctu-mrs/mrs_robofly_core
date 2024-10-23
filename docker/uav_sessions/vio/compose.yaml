@@ -110,7 +110,7 @@ services:
       - rostime
     network_mode: host
     volumes:
-      - shared_data:/etc/docker/shared_data:consistent                
+      - shared_data:/etc/docker/shared_data:consistent
     env_file:
       - ./stack.env
     command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
