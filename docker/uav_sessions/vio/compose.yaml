@@ -6,8 +6,6 @@ volumes:
 
   bag_files:
 
-  catkin_workspace:
-
 services:
 
   # will copy session-specific data shared between containers from the shared_data container to a shared volume
@@ -23,13 +21,6 @@ services:
     volumes:
       - uav_custom_files:/tmp/docker/uav_custom_files:consistent
     command: sh -c "rm -rvf /tmp/docker/uav_custom_files/*; mkdir -pv /tmp/docker/uav_custom_files; cp -rv /etc/docker/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /tmp/docker/uav_custom_files/"
-
-  # will copy user's ROS catkin workspace from the 'transfer' alpine image to a shared volume
-  copy_catkin_workspace:
-    image: precise_landing:1.0.0
-    volumes:
-      - catkin_workspace:/tmp/docker/catkin_workspace:consistent
-    command: sh -c "rm -rvf /tmp/docker/catkin_workspace/*; mkdir -pv /tmp/docker/catkin_workspace; cp -rv /etc/docker/catkin_workspace/* /tmp/docker/catkin_workspace/"
 
   # starts roscore
   # this is the first container in the ROS pipeline
@@ -120,10 +111,9 @@ services:
     network_mode: host
     volumes:
       - shared_data:/etc/docker/shared_data:consistent                
-      - catkin_workspace:/etc/docker/catkin_workspace:consistent 
     env_file:
       - ./stack.env
-    command: bash -c "source /etc/docker/catkin_workspace/devel/setup.bash && waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
+    command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
 
   # starts `rosbag record`
   rosbag:
@@ -152,7 +142,6 @@ services:
       - shared_data:/etc/docker/shared_data:consistent
       - uav_custom_files:/etc/docker/uav_custom_files:consistent
       - /dev/:/dev/
-      - catkin_workspace:/etc/docker/catkin_workspace:consistent
     command:
       - bash --rcfile /opt/ros/noetic/setup.bash
     privileged: true
