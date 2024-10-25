@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOCAL_TAG=mrs_uav_system:custom
+LOCAL_TAG=mrs_uav_system:1.5.0-unstable
 REGISTRY=localhost:5000
 
 docker buildx use default

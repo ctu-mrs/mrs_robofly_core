@@ -1,6 +1,6 @@
 FROM ctumrs/mrs_uav_system:1.5.0
 
-LABEL mrs.uav.system.version=1.5.0-custom
+LABEL mrs.uav.system.version=1.5.0-unstable
 
 RUN curl https://ctu-mrs.github.io/ppa-unstable/add_ppa.sh | bash
 
