@@ -6,6 +6,8 @@ volumes:
 
   bag_files:
 
+  logs:
+
 services:
 
   # will copy session-specific data shared between containers from the shared_data container to a shared volume
@@ -112,6 +114,14 @@ services:
     env_file:
       - ./stack.env
     command: bash -c "waitForTime && /etc/docker/shared_data/record.sh"
+
+  dogtail:
+
+    image: klaxalk/dogtail:latest
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - logs:/etc/logs:consistent
 
   # this container can be used to access a terminal with ROS inside the compose session
   terminal:

@@ -16,8 +16,29 @@ exclude=(
 # ROS communication hiccups, which can lead to eland, failsafe
 # or just a CRASH.
 
-# don't record cameras
-'(.*)camera_(.*)'
+'(.*)camera_front/image_raw'
+'(.*)camera_front/camera_info'
+'(.*)camera_front/image_raw/compressed(.*)'
+'(.*)camera_front/image_raw/theora(.*)'
+'(.*)camera_front/image_raw/compressedDepth(.*)'
+
+'(.*)camera_down/image_raw'
+'(.*)camera_down/camera_info'
+'(.*)camera_down/image_raw/compressed(.*)'
+'(.*)camera_down/image_raw/theora(.*)'
+'(.*)camera_down/image_raw/compressedDepth(.*)'
+
+'(.*)camera_front_throttled/image_raw'
+'(.*)camera_front_throttled/camera_info'
+# '(.*)camera_front_throttled/image_raw/compressed(.*)'
+'(.*)camera_front_throttled/image_raw/theora(.*)'
+'(.*)camera_front_throttled/image_raw/compressedDepth(.*)'
+
+'(.*)camera_down_throttled/image_raw'
+'(.*)camera_down_throttled/camera_info'
+# '(.*)camera_down_throttled/image_raw/compressed(.*)'
+'(.*)camera_down_throttled/image_raw/theora(.*)'
+'(.*)camera_down_throttled/image_raw/compressedDepth(.*)'
 
 '(.*)apriltag(.*)'
 

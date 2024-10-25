@@ -2,11 +2,13 @@ volumes:
 
   catkin_workspace:
 
+  logs:
+
 services:
 
   # will copy user's ROS catkin workspace from the 'transfer' alpine image to a shared volume
   copy_catkin_workspace:
-    image: user_workspace:1.0.0
+    image: catkin_workspace:1.0.0
     volumes:
       - catkin_workspace:/tmp/docker/catkin_workspace:consistent
     command: sh -c "rm -rvf /tmp/docker/catkin_workspace/*; mkdir -pv /tmp/docker/catkin_workspace; cp -rv /etc/docker/catkin_workspace/* /tmp/docker/catkin_workspace/"
@@ -22,6 +24,12 @@ services:
     env_file:
       - ./stack.env
     command: bash -c "source /etc/docker/catkin_workspace/devel/setup.bash && waitForRos && roslaunch mrs_robofly_example robofly_example.launch"
+
+  dogtail:
+    image: klaxalk/dogtail:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - logs:/etc/logs:consistent
 
   # this container can be used to access a terminal with ROS inside the compose session
   terminal:

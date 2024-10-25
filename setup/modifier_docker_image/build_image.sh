@@ -5,4 +5,4 @@ REGISTRY=localhost:5000
 
 docker buildx use default
 
-docker build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=linux/arm64 --push
+docker build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=linux/arm64 --push --no-cache

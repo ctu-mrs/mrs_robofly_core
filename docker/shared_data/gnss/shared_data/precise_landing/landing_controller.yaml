@@ -1,3 +1,6 @@
+# what controller will be used for the landing
+controller: "Se3Controller"
+
 desired_heading:
 
   relative_to_pad:
@@ -7,7 +10,7 @@ desired_heading:
 stages:
 
   aligning:
-    speed: 0.2    # [m/s]
+    speed: 0.4    # [m/s]
     height: 1.3   # [m]
 
   repeating:
@@ -18,6 +21,15 @@ stages:
 
   descending:
     speed: 0.2    # [m/s]
+    height: 0.8   # [m]
 
   landing:
-    speed: 0.2          # [m/s]
+    speed: 0.3          # [m/s]
+    mass_factor: 0.8    # [-] mass factor for landing detection
+
+    disarming:
+      mass_factor: 0.75   # [-] mass factor for landing detection
+
+      vision:
+        enabled: true
+        distance: 0.05 # [m]

@@ -16,3 +16,25 @@ mrs_uav_managers:
 
       after_takeoff:
         controller: "Se3Controller"
+
+      during_takeoff:
+        controller: "Se3Controller"
+
+    midair_activation:
+
+      after_activation:
+        controller: "Se3Controller"
+
+  gain_manager:
+
+    supersoft:
+
+      mass_estimator:
+
+        km: 0.50 # [kg/s], mass estimator max rate
+
+    soft:
+
+      mass_estimator:
+
+        km: 0.50 # [kg/s], mass estimator max rate
