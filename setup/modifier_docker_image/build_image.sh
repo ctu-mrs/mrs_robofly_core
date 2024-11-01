@@ -1,8 +1,8 @@
 #!/bin/bash
 
-LOCAL_TAG=mrs_uav_system:1.5.0-unstable
-REGISTRY=localhost:5000
+LOCAL_TAG=mrs_uav_system:1.5.0
+REGISTRY=klaxalk:5000
 
 docker buildx use default
 
-docker build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=linux/arm64 --push --no-cache
+docker build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=linux/arm64 --push --no-cache --progress=plain
