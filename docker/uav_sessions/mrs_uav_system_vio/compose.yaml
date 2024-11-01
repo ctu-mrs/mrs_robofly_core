@@ -132,10 +132,16 @@ services:
 
   dogtail:
     image: klaxalk/dogtail:latest
-
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/etc/logs:consistent
+
+  rosbridge:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    env_file:
+      - ./stack.env
+    command: bash -c "waitForRos && roslaunch rosbridge_server rosbridge_websocket.launch"
 
   # this container can be used to access a terminal with ROS inside the compose session
   terminal:
