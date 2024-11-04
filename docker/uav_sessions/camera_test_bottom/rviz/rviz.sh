@@ -1,5 +1,9 @@
-export ROS_MASTER_URI=http://uav85:11311
+UAV_NAME=uav85
+
+export ROS_MASTER_URI=http://$UAV_NAME:11311
 export ROS_IP=192.168.12.11
 unset ROS_HOSTNAME
+
+sed -i "s/uav[0-9]\+/$UAV_NAME/g" ./camera_test.rviz
 
 rosrun rviz rviz -d ./camera_test.rviz
