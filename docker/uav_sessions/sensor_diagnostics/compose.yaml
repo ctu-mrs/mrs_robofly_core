@@ -11,7 +11,8 @@ services:
     image: fly4future/uav_custom_files
     volumes:
       - uav_custom_files:/tmp/docker/uav_custom_files:consistent
-    command: sh -c "rm -rvf /tmp/docker/uav_custom_files/*; mkdir -pv /tmp/docker/uav_custom_files; cp -rv /etc/docker/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /tmp/docker/uav_custom_files/"
+   tty: true
+   command: sh -c "rm -rvf /tmp/docker/uav_custom_files/*; mkdir -pv /tmp/docker/uav_custom_files; cp -rv /etc/docker/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /tmp/docker/uav_custom_files/"
 
   # starts roscore
   # this is the first container in the ROS pipeline
@@ -22,6 +23,7 @@ services:
       - copy_uav_custom_files
     env_file:
       - ./stack.env
+    tty: true
     command: roscore
 
   # starts the HW API for connecting the MRS UAV System to PX4
@@ -33,6 +35,7 @@ services:
     privileged: true
     env_file:
       - ./stack.env
+    tty: true
     command: bash -c "waitForRos && roslaunch mrs_uav_px4_api api.launch"
 
   # starts the camera drivers
@@ -46,6 +49,7 @@ services:
     privileged: true
     env_file:
       - ./stack.env
+    tty: true
     command: bash -c "waitForRos && roslaunch /etc/docker/uav_custom_files/launch_files/cameras.launch"
 
   rosbridge:
@@ -53,6 +57,7 @@ services:
     network_mode: host
     env_file:
       - ./stack.env
+    tty: true
     command: bash -c "waitForRos && roslaunch rosbridge_server rosbridge_websocket.launch"
 
   # this container can be used to access a terminal with ROS inside the compose session

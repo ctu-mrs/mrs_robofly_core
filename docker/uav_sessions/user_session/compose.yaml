@@ -11,6 +11,7 @@ services:
     image: catkin_workspace:1.0.0
     volumes:
       - catkin_workspace:/tmp/docker/catkin_workspace:consistent
+    tty: true
     command: sh -c "rm -rvf /tmp/docker/catkin_workspace/*; mkdir -pv /tmp/docker/catkin_workspace; cp -rv /etc/docker/catkin_workspace/* /tmp/docker/catkin_workspace/"
 
   # starts the HW API for connecting the MRS UAV System to PX4
@@ -23,8 +24,10 @@ services:
       - catkin_workspace:/etc/docker/catkin_workspace:consistent
     env_file:
       - ./stack.env
+    tty: true
     command: bash -c "source /etc/docker/catkin_workspace/devel/setup.bash && waitForRos && roslaunch mrs_robofly_example robofly_example.launch"
 
+  # starts a plaintext logger
   dogtail:
     image: klaxalk/dogtail:latest
     volumes:

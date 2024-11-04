@@ -13,6 +13,7 @@ services:
     image: fly4future/robofly:shared_data_camera_tests
     volumes:
       - shared_data:/tmp/docker/shared_data:consistent
+    tty: true
     command: sh -c "rm -rvf /tmp/docker/shared_data/*; mkdir -pv /tmp/docker/shared_data; cp -rv /etc/docker/shared_data/* /tmp/docker/shared_data/"
 
   # will copy uav-specific configs, launch files and other files from the uav-specific docker image to a shared volume
@@ -20,6 +21,7 @@ services:
     image: fly4future/uav_custom_files
     volumes:
       - uav_custom_files:/tmp/docker/uav_custom_files:consistent
+    tty: true
     command: sh -c "rm -rvf /tmp/docker/uav_custom_files/*; mkdir -pv /tmp/docker/uav_custom_files; cp -rv /etc/docker/uav_custom_files/${UAV_TYPE}/${UAV_ID}/* /tmp/docker/uav_custom_files/"
 
   # starts roscore
@@ -31,6 +33,7 @@ services:
       - copy_uav_custom_files
     env_file:
       - ./stack.env
+    tty: true
     command: roscore
 
   # starts the camera drivers
@@ -44,6 +47,7 @@ services:
     privileged: true
     env_file:
       - ./stack.env
+    tty: true
     command: bash -c "waitForRos && roslaunch /etc/docker/uav_custom_files/launch_files/cameras.launch throttled_rate:=5"
 
   apriltag_front:
@@ -55,6 +59,7 @@ services:
       - shared_data:/etc/docker/shared_data:consistent
     env_file:
       - ./stack.env
+    tty: true
     command: bash -c "waitForRos && roslaunch /etc/docker/shared_data/apriltag_detector.launch custom_config:=/etc/docker/shared_data/apriltag.yaml camera_node:=camera_front_throttled image_topic:=image_raw"
 
   rosbridge:
@@ -62,6 +67,7 @@ services:
     network_mode: host
     env_file:
       - ./stack.env
+    tty: true
     command: bash -c "waitForRos && roslaunch rosbridge_server rosbridge_websocket.launch"
 
   # this container can be used to access a terminal with ROS inside the compose session
