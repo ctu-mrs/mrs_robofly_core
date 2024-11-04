@@ -13,7 +13,7 @@
 
       <remap from="~control_manager_diag_in" to="control_manager/diagnostics" />
 
-      <remap from="~path_out" to="trajectory_generation/path" />
+      <remap from="~trajectory_out" to="control_manager/trajectory_reference" />
       <remap from="~land_out" to="uav_manager/land" />
 
     </node>

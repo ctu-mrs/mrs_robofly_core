@@ -3,8 +3,9 @@
 import rospy
 import numpy
 
-from mrs_msgs.msg import ControlManagerDiagnostics,Reference
-from mrs_msgs.srv import PathSrv,PathSrvRequest
+from mrs_msgs.msg import ControlManagerDiagnostics
+from mrs_msgs.msg import Reference
+from mrs_msgs.srv import TrajectoryReferenceSrv,TrajectoryReferenceSrvRequest
 from std_srvs.srv import Trigger,TriggerRequest
 
 class Node:
@@ -19,7 +20,7 @@ class Node:
 
         self.frame_id = rospy.get_param("~frame_id")
 
-        self.distance = rospy.get_param("~distance")
+        self.heading_rate = rospy.get_param("~heading_rate")
 
         self.timer_main_rate = rospy.get_param("~timer_main/rate")
 
@@ -31,7 +32,7 @@ class Node:
 
         ## | --------------------- service clients -------------------- |
 
-        self.sc_path = rospy.ServiceProxy('~path_out', PathSrv)
+        self.sc_trajectory = rospy.ServiceProxy('~trajectory_out', TrajectoryReferenceSrv)
 
         self.sc_land = rospy.ServiceProxy('~land_out', Trigger)
 
@@ -43,6 +44,7 @@ class Node:
 
         self.is_initialized = True
 
+        self.called = False
         self.started = False
         self.finished = False
 
@@ -52,54 +54,42 @@ class Node:
 
     ## | ------------------------- methods ------------------------ |
 
-    # #{ planPath()
+    # #{ planTrajectory()
 
-    def planPath(self):
+    def planTrajectory(self):
 
-        rospy.loginfo('[RoboflyExample]: planning path')
+        rospy.loginfo('[RoboflyExample]: planning trajectory')
 
-        # https://ctu-mrs.github.io/mrs_msgs/srv/PathSrv.html
-        # -> https://ctu-mrs.github.io/mrs_msgs/msg/Path.html
-        path_msg = PathSrvRequest()
+        # https://ctu-mrs.github.io/mrs_msgs/srv/TrajectoryReference.html
+        # -> https://ctu-mrs.github.io/mrs_msgs/srv/TrajectoryReferenceSrv.html
+        trajectory_srv = TrajectoryReferenceSrvRequest()
 
-        path_msg.path.header.frame_id = self.frame_id
-        path_msg.path.header.stamp = rospy.Time.now()
+        trajectory_srv.trajectory.header.frame_id = self.frame_id
+        trajectory_srv.trajectory.header.stamp = rospy.Time.now()
 
-        path_msg.path.fly_now = True
+        trajectory_srv.trajectory.fly_now = True
 
-        path_msg.path.use_heading = True
+        trajectory_srv.trajectory.use_heading = True
 
-        # https://ctu-mrs.github.io/mrs_msgs/msg/Reference.html
-        point1 = Reference()
+        duration = 6.28 * (1.0 / self.heading_rate)
+        n_steps  = int(duration * 5.0) # 5.0 [s] is the default sampling rate of the trajectory
+        step     = 6.28 / n_steps
 
-        point1.position.x = self.distance
-        point1.position.y = 0
-        point1.position.z = 0
-        point1.heading = 0.0
+        for i in range(0, n_steps):
 
-        path_msg.path.points.append(point1)
+            # https://ctu-mrs.github.io/mrs_msgs/msg/Reference.html
+            point = Reference()
 
-        point2 = Reference()
+            point.position.x = 0
+            point.position.y = 0
+            point.position.z = 0
+            point.heading = i*step
 
-        point2.position.x = -self.distance
-        point2.position.y = 0
-        point2.position.z = 0
-        point2.heading = 0.0
+            trajectory_srv.trajectory.points.append(point)
 
-        path_msg.path.points.append(point2)
+        return trajectory_srv
 
-        point3 = Reference()
-
-        point3.position.x = 0
-        point3.position.y = 0
-        point3.position.z = 0
-        point3.heading = 0.0
-
-        path_msg.path.points.append(point3)
-
-        return path_msg
-
-    # #} end of planPath()
+    # #} end of planTrajectory()
 
     # #{ land()
 
@@ -115,7 +105,7 @@ class Node:
             rospy.logerr('[RoboflyExample]: land service not callable')
             pass
 
-    # #} end of planPath()
+    # #} end of load()
 
     ## | ------------------------ callbacks ----------------------- |
 
@@ -145,24 +135,33 @@ class Node:
 
         if isinstance(self.sub_control_manager_diag, ControlManagerDiagnostics):
 
-            if self.sub_control_manager_diag.flying_normally and not self.started and not self.finished:
+            if self.sub_control_manager_diag.flying_normally and not self.started and not self.finished and not self.called:
 
-                path_msg = self.planPath()
+                trajectory_srv = self.planTrajectory()
 
                 try:
-                    response = self.sc_path.call(path_msg)
+                    response = self.sc_trajectory.call(trajectory_srv)
                 except:
-                    rospy.logerr('[RoboflyExample]: path service not callable')
+                    rospy.logerr('[RoboflyExample]: trajectory service not callable')
                     pass
 
                 if response.success:
-                    rospy.loginfo('[RoboflyExample]: path set')
-                else:
-                    rospy.loginfo('[RoboflyExample]: path setting failed, message: {}'.format(response.message))
 
-                self.started = True
+                    rospy.loginfo('[RoboflyExample]: trajectory set')
+
+                    self.called = True
+
+                else:
+                    rospy.loginfo('[RoboflyExample]: trajectory setting failed, message: {}'.format(response.message))
 
                 return
+
+            if self.called:
+
+                if self.sub_control_manager_diag.tracker_status.have_goal:
+
+                    self.called = False
+                    self.started = True
 
             if self.started and not self.sub_control_manager_diag.tracker_status.have_goal and not self.finished:
 

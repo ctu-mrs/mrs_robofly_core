@@ -3,4 +3,4 @@ frame_id: "fcu_untilted"
 timer_main:
   rate: 1.0 # [Hz]
 
-distance: 0.5 # [m]
+heading_rate: 0.6 # [rad/s]
