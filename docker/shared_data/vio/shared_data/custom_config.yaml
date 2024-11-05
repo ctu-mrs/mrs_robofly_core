@@ -14,6 +14,8 @@ mrs_uav_managers:
 
     takeoff:
 
+      takeoff_height: 1.0 # [m]
+
       during_takeoff:
         controller: "Se3Controller"
 
