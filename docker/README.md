@@ -1,3 +1,19 @@
-# Docker
+# Docker materials
 
-This folder contains Docker sessions.
+This folder contains Docker cmposessions.
+
+## [shared_data](./shared_data)
+
+Custom configuration and files specific to user's docker sessions.
+
+## [simulation](./simulation)
+
+Local docker compose session for running the MRS UAV System Gazebo simulation with the Robofly.
+
+## [uav_sessions](./uav_sessions)
+
+Docker compose sessions for the Robofly drone.
+
+## [user_workspace](./user_workspace)
+
+This folder contains mechanims for compiling a user's workspace for the Robofly drone.

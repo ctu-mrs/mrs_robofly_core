@@ -1,4 +1,4 @@
-UAV_NAME=uav85
+UAV_NAME=$1
 
 export ROS_MASTER_URI=http://$UAV_NAME:11311
 export ROS_IP=192.168.12.11

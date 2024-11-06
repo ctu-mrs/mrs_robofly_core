@@ -31,4 +31,4 @@ safety_area:
     frame_name: "local_origin"
 
     max_z: 10.0
-    min_z: -2.0
+    min_z: -10.0
