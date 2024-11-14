@@ -1,5 +1,5 @@
 ARG WORKSPACE_PATH
-ARG BASE_IMAGE=ctumrs/mrs_uav_system:1.5.0_ai_kit
+ARG BASE_IMAGE=ctumrs/mrs_uav_system:1.5.0_hailo_ai
 
 #############################################################################
 

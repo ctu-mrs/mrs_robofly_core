@@ -15,7 +15,7 @@ cd ${MY_PATH}
 ## |                            setup                           |
 ## --------------------------------------------------------------
 
-LOCAL_TAG=catkin_workspace:ai_kit
+LOCAL_TAG=catkin_workspace:yolo
 
 ARCH=arm64 # robofly
 # ARCH=amd64

@@ -53,7 +53,7 @@ Visualization Manager:
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
-      Image Topic: /uav84/camera_front_throttled/image_raw
+      Image Topic: /uav85/camera_front_throttled/image_raw
       Name: Camera
       Overlay Alpha: 0
       Queue Size: 2
@@ -88,7 +88,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: uav84/fcu
+    Fixed Frame: uav85/fcu
     Frame Rate: 30
   Name: root
   Tools:
