@@ -40,6 +40,11 @@ exclude=(
 '(.*)camera_down_throttled/image_raw/theora(.*)'
 '(.*)camera_down_throttled/image_raw/compressedDepth(.*)'
 
+'(.*)yolo(.*)image_raw'
+# '(.*)yolo(.*)compressed(.*)'
+'(.*)yolo(.*)theora(.*)'
+'(.*)yolo(.*)compressedDepth(.*)'
+
 '(.*)apriltag(.*)'
 
 '(.*)ov_msckf(.*)'
