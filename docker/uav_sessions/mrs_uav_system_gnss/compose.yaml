@@ -108,7 +108,7 @@ services:
     env_file:
       - ./stack.env
     tty: true
-    command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch"
+    command: bash -c "waitForHw && roslaunch mrs_uav_autostart automatic_start.launch custom_config:=/etc/docker/shared_data/automatic_start.yaml"
 
   # starts `rosbag record`
   rosbag:

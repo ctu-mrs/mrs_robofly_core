@@ -27,7 +27,7 @@ ARCH=arm64 # robofly
 
 docker buildx use default
 
-docker buildx build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=linux/${ARCH}
+docker buildx build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=linux/${ARCH} --no-cache
 
 echo ""
 echo "$0: shared data were packed into '$LOCAL_TAG'"
