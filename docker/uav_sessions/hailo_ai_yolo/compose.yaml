@@ -27,7 +27,7 @@ services:
       - ./stack.env
     tty: true
     privileged: true
-    command: bash -c "sleep 5.0; source /etc/docker/catkin_workspace/devel/setup.bash && waitForRos && roslaunch mrs_yolo_detector detector.launch camera_node:=camera_front"
+    command: bash -c "sleep 5.0; source /etc/docker/catkin_workspace/devel/setup.bash && waitForRos && roslaunch mrs_yolo_detector detector.launch camera_node:=camera_front_throttled"
 
   # starts a plaintext logger
   dogtail:
