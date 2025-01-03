@@ -6,7 +6,7 @@ volumes:
 
 services:
 
-  # will copy user's ROS catkin workspace from the 'transfer' alpine image to a shared volume
+  # will copy user's ROS catkin workspace from the 'transport' alpine image to a shared volume
   copy_catkin_workspace:
     image: catkin_workspace:1.0.0
     volumes:
