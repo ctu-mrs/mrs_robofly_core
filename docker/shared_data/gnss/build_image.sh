@@ -1,10 +1,5 @@
 #!/bin/bash
 
-set -e
-
-trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
-trap 'echo "$0: \"${last_command}\" command failed with exit code $?"' ERR
-
 # get the path to this script
 MY_PATH=`dirname "$0"`
 MY_PATH=`( cd "$MY_PATH" && pwd )`
@@ -18,16 +13,35 @@ cd ${MY_PATH}
 LOCAL_TAG=robofly:shared_data_gnss
 REGISTRY=fly4future
 
-ARCH=arm64 # robofly
-# ARCH=amd64
+# single-platform image can be stored locally
+# ARCH=linux/amd64
+ARCH=linux/arm64
+OUTPUT="--output type=docker"
+
+# multi-platform image can not be stored locally, needs to be pushed
+# ARCH=linux/arm64,linux/amd64
+# OUTPUT="--push"
 
 ## --------------------------------------------------------------
 ## |                            build                           |
 ## --------------------------------------------------------------
 
-docker buildx use default
+# multiplatform builder
+BUILDER=container-builder
 
-docker buildx build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=linux/${ARCH} --no-cache
+# get info about an existing builder
+container_builder_info=$(docker buildx inspect ${BUILDER})
+
+if [[ "$?" == "0" ]]; then
+  # activate the builder if it exists
+  docker buildx use ${BUILDER}
+else
+  # create the builder if it does not exist
+  docker buildx create --name ${BUILDER} --driver docker-container --bootstrap --use
+fi
+
+# build the docker image using the builder and export the results to the local docker registry
+docker buildx build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=${ARCH} ${OUTPUT}
 
 echo ""
 echo "$0: shared data were packed into '$LOCAL_TAG'"

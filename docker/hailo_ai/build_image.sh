@@ -10,8 +10,8 @@ cd ${MY_PATH}
 ## |                            setup                           |
 ## --------------------------------------------------------------
 
-LOCAL_TAG=robofly:shared_data_vio
-REGISTRY=fly4future
+LOCAL_TAG=mrs_uav_system:1.5.0_hailo_ai
+REGISTRY=ctumrs
 
 # single-platform image can be stored locally
 # ARCH=linux/amd64
