@@ -1,0 +1,95 @@
+services:
+
+  # zenoh router
+  zenoh:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    env_file:
+      - ./stack.env
+    command: bash -c "export ZENOH_ROUTER_CONFIG_URI=`ros2 pkg prefix --share mrs_uav_deployment`/config/zenoh/uav_router.json5; ros2 run rmw_zenoh_cpp rmw_zenohd"
+
+  # starts the HW API for connecting the MRS UAV System to PX4
+  hw_api:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - /dev:/dev
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_uav_px4_api api.launch.py"
+
+  # starts the open_vins visual inertial odometry
+  open_vins:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - ./shared_data:/etc/docker/shared_data
+      - /dev/:/dev/
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_open_vins_core open_vins.launch.py config_path:=/etc/docker/shared_data/config/estimator_config.yaml"
+
+  # starts the MRS UAV System's core
+  uav_core:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - ./shared_data:/etc/docker/shared_data
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_uav_core core.launch.py platform_config:=/etc/docker/shared_data/platform_config.yaml world_config:=`ros2 pkg prefix --share mrs_uav_deployment`/config/worlds/world_${WORLD_NAME}.yaml custom_config:=/etc/docker/shared_data/custom_config.yaml network_config:=/etc/docker/shared_data/network_config.yaml"
+
+  # starts the camera drivers
+  cameras:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - /dev/:/dev/
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch libcamera_ros_driver camera.launch.py"
+
+  # starts the node that handles automatic initialization of the system and takeoff
+  automatic_start:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_uav_autostart automatic_start.launch.py"
+
+  static_tfs:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - /dev:/dev
+      - ./shared_data:/etc/docker/shared_data:consistent
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "/etc/docker/shared_data/static_tfs.sh"
+
+  # `rosbag record`
+  # - wayForOffboard will unblock during takeoff
+  # - the rosbags are going to be placed in
+  #       /home/mrs/docker/mrs_uav_system_vio/bag_files
+  rosbag:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - ./shared_data:/etc/docker/shared_data
+      - /home/${DRONE_USER_NAME}/docker/${SESSION_NAME}/bag_files:/etc/docker/bag_files:consistent
+    env_file:
+      - ./stack.env
+    command: bash -c "/etc/docker/shared_data/record.sh /etc/docker/bag_files"
+
+  # logging of all the docker containers within this session
+  # - the logs are going to be placed in
+  #       /home/mrs/docker/mrs_uav_system_vio/logs
+  dogtail:
+    image: klaxalk/dogtail:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/${DRONE_USER_NAME}/docker/${SESSION_NAME}/logs:/etc/logs:consistent
