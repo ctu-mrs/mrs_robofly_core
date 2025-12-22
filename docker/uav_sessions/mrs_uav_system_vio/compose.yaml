@@ -28,7 +28,7 @@ services:
     privileged: true
     env_file:
       - ./.env
-    command: bash -c "ros2 launch mrs_icm_imu_driver imu.launch.py"
+    command: bash -c "apt-get update && apt-get install -y ros-jazzy-mrs-icm-imu-driver && ros2 launch mrs_icm_imu_driver imu.launch.py"
 
   # starts the open_vins visual inertial odometry
   open_vins:
@@ -61,7 +61,7 @@ services:
     privileged: true
     env_file:
       - ./.env
-    command: bash -c "ros2 launch libcamera_ros_driver camera.launch.py"
+    command: bash -c "apt-get update && apt-get install -y ros-jazzy-libcamera-ros-driver && ros2 launch libcamera_ros_driver camera.launch.py"
 
   # starts the node that handles automatic initialization of the system and takeoff
   automatic_start:
