@@ -1,0 +1,136 @@
+# Motor thrust curve parameters
+# a - quadratic term
+# b - constant term
+# n_motors - number of motors on the UAV
+
+motor_params:
+  a: 0.2882
+  b: -0.0895
+  n_motors: 4
+
+mrs_uav_managers:
+
+  uav_manager:
+
+    landing:
+
+      # those two must apply simultaneously
+      landing_cutoff_mass_factor:  0.75 # how much lighter does the drone appear to be?
+      landing_cutoff_timeout:  0.5 # [s] how long does the throttle has to be below the mass factor
+
+  control_manager:
+
+    Se3Controller:
+
+      eland_threshold: 2.5
+      failsafe_threshold: 3.5
+
+    MpcController:
+
+      eland_threshold: 2.5
+      failsafe_threshold: 3.5
+
+    rc_joystick:
+
+      horizontal_speed: 3.00 # [m/s]
+      vertical_speed: 2.00 # [m/s]
+      heading_rate: 2.0 # [rad/s]
+
+    safety:
+
+      # emergency landing (still feedback)
+      eland:
+
+        cutoff_mass_factor:  0.75 # how much lighter does the drone appear to be?
+        cutoff_timeout:  0.5 # [s] how long does the throttle has to be below the mass factor
+
+  estimation_manager:
+
+    # loaded state estimator plugins
+    # available in mrs_uav_state_estimators: gps_garmin, gps_baro, rtk, aloam, ground_truth, dummy
+    state_estimators: [
+      "gps_baro",
+    ]
+
+    initial_state_estimator: "gps_baro" # will be used as the first state estimator
+    agl_height_estimator: "" # only slightly filtered height for checking min height (not used in control feedback)
+
+  constraint_manager:
+
+    estimator_types: [
+      "gps_baro",
+    ]
+
+    # list of allowed gains per odometry mode
+    allowed_constraints:
+      gps_baro: ["slow", "medium", "fast"]
+
+    default_constraints:
+      gps_baro: "medium"
+
+  gain_manager:
+
+    estimator_types: [
+      "gps_baro",
+    ]
+
+    # list of allowed gains per odometry mode
+    allowed_gains:
+      gps_baro: ["soft", "supersoft"]
+
+    default_gains:
+      gps_baro: "soft"
+
+    supersoft:
+
+      mass_estimator:
+
+        km: 0.05 # [kg/s], mass estimator max rate
+
+    soft:
+
+      horizontal:
+        kp: 8.0
+        kv: 4.0
+        ka: 1.0
+
+        kib: 0.1
+        kib_lim: 10.0
+
+        kiw: 0.1
+        kiw_lim: 10.0
+
+      vertical:
+        kp: 15.0
+        kv: 8.0
+        ka: 1.0
+
+      attitude:
+        kq_roll_pitch: 5.0
+        kq_yaw: 5.0
+
+      mass_estimator:
+        km: 0.05
+
+        # the maximum estimated uav mass difference
+        km_lim: 20.0 # [kg, at least 1/2 of the UAVs mass to allow landing detection]
+
+mrs_uav_trackers:
+
+  landoff_tracker:
+
+    max_position_difference: 2.0
+    vertical_tracker:
+
+      takeoff_speed: 1.0
+      takeoff_acceleration: 0.5
+
+mrs_uav_controllers:
+
+  mpc_controller:
+
+    so3:
+
+      mass_estimator:
+
+        km: 0.05 # [kg/s], mass estimator max rate

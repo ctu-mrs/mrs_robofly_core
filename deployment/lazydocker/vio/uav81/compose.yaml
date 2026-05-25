@@ -1,0 +1,178 @@
+# Don't change the volume names without also changing them in up.sh
+volumes:
+
+  # Going to be filled with the contents of the
+  #       ./shared_data/
+  # folder.
+  shared_data:
+
+  # Going to be filled with the workspace built by
+  #       ../colcon_workspace_builder/
+  # folder.
+  colcon_workspace:
+
+services:
+
+  # this container primes the shared volumes and allows the content to be place in them
+  init:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    volumes:
+      - shared_data:/etc/docker/shared_data:consistent
+      - colcon_workspace:/etc/docker/colcon_workspace:consistent
+
+  # zenoh router
+  zenoh:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    env_file:
+      - ./stack.env
+    volumes:
+      - /dev:/dev
+      - shared_data:/etc/docker/shared_data
+      - colcon_workspace:/etc/docker/colcon_workspace
+    command: bash -c "export ZENOH_ROUTER_CONFIG_URI=/etc/docker/shared_data/uav_router.json5; ros2 run rmw_zenoh_cpp rmw_zenohd"
+
+  # starts the IMU driver
+  imu_driver:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - /dev/:/dev/
+      - shared_data:/etc/docker/shared_data
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_icm_imu_driver imu.launch.py custom_config:=/etc/docker/shared_data/imu.yaml"
+
+  # camera_front:
+  #   image: ctumrs/libcamera_ros_driver:${MRS_UAV_SYSTEM_VERSION}
+  #   network_mode: host
+  #   volumes:
+  #     - /dev/:/dev/
+  #     - shared_data:/etc/docker/shared_data
+  #   privileged: true
+  #   env_file:
+  #     - ./stack.env
+  #   command: bash -c "ros2 launch libcamera_ros_driver camera.launch.py custom_config:=/etc/docker/shared_data/camera_front/camera_front.yaml camera_name:=front calib_url:=file:///etc/docker/shared_data/config/camera_front/roscalib.yaml"
+
+  camera_down:
+    image: ctumrs/libcamera_ros_driver:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - /dev/:/dev/
+      - shared_data:/etc/docker/shared_data
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch libcamera_ros_driver camera.launch.py custom_config:=/etc/docker/shared_data/camera_down/camera_down.yaml camera_name:=down calib_url:=file:///etc/docker/shared_data/config/camera_down/roscalib.yaml"
+
+  # starts the open_vins visual inertial odometry
+  open_vins:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - shared_data:/etc/docker/shared_data
+      - /dev/:/dev/
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch /etc/docker/shared_data/open_vins.launch.py config_path:=/etc/docker/shared_data/open_vins/estimator_config.yaml standalone:=false container_id:=/uav81/rpi_camera_down_container"
+
+  vins_republisher:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - shared_data:/etc/docker/shared_data
+      - /dev/:/dev/
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_odometry_republisher odometry_republisher.launch.py custom_config:=./config/republisher_vio.yaml new_parent_frame:=odometry topic_in:=/uav81/open_vins/odomimu node_name:=republisher_vio topic_out:=~/odom"
+
+  # # starts a custom node from your colcon_workspace
+  # custom_node:
+  #   image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+  #   network_mode: host
+  #   volumes:
+  #     - /dev:/dev
+  #     - shared_data:/etc/docker/shared_data
+  #     - colcon_workspace:/etc/docker/colcon_workspace
+  #   privileged: true
+  #   env_file:
+  #     - ./stack.env
+  #   command:  >
+  #     bash -c "
+  #       source /etc/docker/colcon_workspace/install/setup.bash && ros2 launch my_package my_node.py
+  #     "
+
+  # starts the HW API for connecting the MRS UAV System to PX4
+  hw_api:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - /dev:/dev
+    privileged: true
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_uav_px4_api api.launch.py"
+
+  # starts the MRS UAV System's core
+  uav_core:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - /dev:/dev
+      - shared_data:/etc/docker/shared_data
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_uav_core core.launch.py platform_config:=/etc/docker/shared_data/platform_config.yaml world_config:=/etc/docker/shared_data/world_local.yaml custom_config:=/etc/docker/shared_data/custom_config.yaml network_config:=/etc/docker/shared_data/network_config.yaml"
+
+  # automatic initialization of the system and takeoff
+  automatic_start:
+    image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+    network_mode: host
+    volumes:
+      - /dev/:/dev/
+      - shared_data:/etc/docker/shared_data
+    env_file:
+      - ./stack.env
+    command: bash -c "ros2 launch mrs_uav_autostart automatic_start.launch.py custom_config:=/etc/docker/shared_data/automatic_start.yaml"
+
+  # static_tfs:
+  #   image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+  #   network_mode: host
+  #   volumes:
+  #     - /dev:/dev
+  #     - shared_data:/etc/docker/shared_data:consistent
+  #   privileged: true
+  #   env_file:
+  #     - ./stack.env
+  #   command: bash -c "/etc/docker/shared_data/static_tfs.sh"
+
+  # # `rosbag record`
+  # # - wayForOffboard will unblock during takeoff
+  # # - the rosbags are going to be placed in
+  # #       /home/mrs/docker/${SESSION_NAME}/bag_files
+  # rosbag:
+  #   image: ctumrs/mrs_uav_system:${MRS_UAV_SYSTEM_VERSION}
+  #   network_mode: host
+  #   environment:
+  #     - SESSION_NAME=${SESSION_NAME}
+  #   volumes:
+  #     - /dev/:/dev/
+  #     - /home/mrs/docker/${SESSION_NAME}/bag_files:/etc/docker/bag_files:consistent
+  #     - shared_data:/etc/docker/shared_data:consistent
+  #   env_file:
+  #     - ./stack.env
+  #   command: bash -c "waitForOffboard; /etc/docker/shared_data/record.sh"
+
+  # logging of all the docker containers within this session
+  # - the logs are going to be place in
+  #       /home/mrs/docker/${SESSION_NAME}/logs
+  dogtail:
+    image: klaxalk/dogtail:latest
+    environment:
+      - SESSION_NAME=${SESSION_NAME}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/mrs/docker/${SESSION_NAME}/logs:/etc/logs:consistent

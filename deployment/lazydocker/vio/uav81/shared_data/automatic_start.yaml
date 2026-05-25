@@ -1,0 +1,7 @@
+preflight_check:
+
+  # takeoff not allowed if UAV's speed exceeds <max_speed>
+  speed_check:
+
+    enabled: false
+    max_speed: 1.0 # [m/s]

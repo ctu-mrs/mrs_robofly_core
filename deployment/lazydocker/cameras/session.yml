@@ -1,0 +1,20 @@
+name: docker
+root: ./
+socket_name: mrs
+attach: false
+tmux_options: -f /etc/ctu-mrs/tmux.conf
+startup_window: lazydocker
+windows:
+  - lazydocker:
+      layout: 6102,174x53,0,0[174x38,0,0,0,174x14,0,39,5]
+      panes:
+        - export DOCKER_HOST=tcp://uav81:2375 && lazydocker
+        - export DOCKER_HOST=tcp://uav81:2375 && cd uav81 && ./up.sh
+  - rviz:
+      layout: tiled
+      panes:
+        - ros2 run rviz2 rviz2 -d ./config1.rviz --ros-args -r __node:=rviz1
+  - zenoh_router:
+      layout: tiled
+      panes:
+        - export ZENOH_ROUTER_CONFIG_URI=./zenoh_router.json5 && ros2 run rmw_zenoh_cpp rmw_zenohd

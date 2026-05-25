@@ -1,0 +1,7 @@
+libcamera_ros_driver:
+
+  camera_name: "/base/axi/pcie@1000120000/rp1/i2c@88000/imx296@1a"
+  camera_id: 0
+
+  control:
+    fps: 20 # [Hz] Note: f
