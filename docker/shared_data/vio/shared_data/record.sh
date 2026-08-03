@@ -30,18 +30,18 @@ exclude=(
 
 '(.*)camera_front_throttled/image_raw'
 '(.*)camera_front_throttled/camera_info'
-# '(.*)camera_front_throttled/image_raw/compressed(.*)'
+'(.*)camera_front_throttled/image_raw/compressed(.*)'
 '(.*)camera_front_throttled/image_raw/theora(.*)'
 '(.*)camera_front_throttled/image_raw/compressedDepth(.*)'
 
 '(.*)camera_down_throttled/image_raw'
 '(.*)camera_down_throttled/camera_info'
-# '(.*)camera_down_throttled/image_raw/compressed(.*)'
+'(.*)camera_down_throttled/image_raw/compressed(.*)'
 '(.*)camera_down_throttled/image_raw/theora(.*)'
 '(.*)camera_down_throttled/image_raw/compressedDepth(.*)'
 
 '(.*)yolo(.*)image_raw'
-# '(.*)yolo(.*)compressed(.*)'
+'(.*)yolo(.*)compressed(.*)'
 '(.*)yolo(.*)theora(.*)'
 '(.*)yolo(.*)compressedDepth(.*)'
 
