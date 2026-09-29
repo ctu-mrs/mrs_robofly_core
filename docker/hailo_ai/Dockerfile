@@ -1,7 +1,7 @@
-FROM ctumrs/mrs_uav_system:1.5.0
+FROM ctumrs/mrs_uav_system:1.5.1
 
 ARG BUILD_PATH="/tmp/build"
-ARG HAILORT_VERSION="v4.18.0"
+ARG HAILORT_VERSION="v4.20.0"
 
 RUN apt install -y ros-noetic-vision-msgs libopencv-dev python3-opencv
 

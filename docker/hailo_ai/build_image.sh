@@ -10,12 +10,12 @@ cd ${MY_PATH}
 ## |                            setup                           |
 ## --------------------------------------------------------------
 
-LOCAL_TAG=mrs_uav_system:1.5.0_hailo_ai
+LOCAL_TAG=mrs_uav_system:1.5.1_hailo_ai
 REGISTRY=ctumrs
 
 # single-platform image can be stored locally
-# ARCH=linux/amd64
-ARCH=linux/arm64
+ARCH=linux/amd64
+# ARCH=linux/arm64
 OUTPUT="--output type=docker"
 
 # multi-platform image can not be stored locally, needs to be pushed
@@ -45,4 +45,6 @@ docker buildx build . --file Dockerfile --tag $REGISTRY/$LOCAL_TAG --platform=${
 
 echo ""
 echo "$0: shared data were packed into '$LOCAL_TAG'"
-echo ""
+echo "" 
+
+docker save $REGISTRY/$LOCAL_TAG | pigz > /tmp/$LOCAL_TAG.tar.gz
