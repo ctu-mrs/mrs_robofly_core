@@ -3,8 +3,6 @@
 # b - constant term
 # n_motors - number of motors on the UAV
 
-uav_mass: 0.8 # [kg] overall mass of the drone
-
 motor_params:
   a: 0.2882
   b: -0.0895
