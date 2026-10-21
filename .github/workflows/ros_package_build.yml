@@ -3,7 +3,7 @@ name: ros_package_build
 on:
 
   push:
-    branches: [ ros2_disabled ]
+    branches: [ ros2 ]
 
     paths-ignore:
       - '**/README.md'
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
