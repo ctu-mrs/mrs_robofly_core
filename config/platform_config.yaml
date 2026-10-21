@@ -3,6 +3,8 @@
 # b - constant term
 # n_motors - number of motors on the UAV
 
+uav_mass: 0.8 # [kg] overall mass of the drone
+
 motor_params:
   a: 0.2882
   b: -0.0895
@@ -15,12 +17,17 @@ mrs_uav_managers:
     landing:
 
       # those two must apply simultaneously
-      landing_cutoff_mass_factor:  0.75 # how much lighter does the drone appear to be?
-      landing_cutoff_timeout:  0.5 # [s] how long does the throttle has to be below the mass factor
+      landing_cutoff_mass_factor: 0.75 # how much lighter does the drone appear to be?
+      landing_cutoff_timeout: 0.5 # [s] how long does the throttle have to be below the mass factor
 
   control_manager:
 
     Se3Controller:
+
+      eland_threshold: 2.5
+      failsafe_threshold: 3.5
+
+    MpcController:
 
       eland_threshold: 2.5
       failsafe_threshold: 3.5
@@ -36,8 +43,8 @@ mrs_uav_managers:
       # emergency landing (still feedback)
       eland:
 
-        cutoff_mass_factor:  0.75 # how much lighter does the drone appear to be?
-        cutoff_timeout:  0.5 # [s] how long does the throttle has to be below the mass factor
+        cutoff_mass_factor: 0.75 # how much lighter does the drone appear to be?
+        cutoff_timeout: 0.5 # [s] how long does the throttle have to be below the mass factor
 
   estimation_manager:
 
@@ -45,10 +52,10 @@ mrs_uav_managers:
     # available in mrs_uav_state_estimators: gps_garmin, gps_baro, rtk, aloam, ground_truth, dummy
     state_estimators: [
       "gps_baro",
-      # "open_vins",
+      "open_vins",
     ]
 
-    initial_state_estimator: "open_vins" # will be used as the first state estimator
+    initial_state_estimator: "gps_baro" # will be used as the first state estimator
     agl_height_estimator: "" # only slightly filtered height for checking min height (not used in control feedback)
 
     gps_baro: # namespace of the state estimator
@@ -58,56 +65,16 @@ mrs_uav_managers:
         process_noise: # process noise covariance (Q)
           pos: 1.0 # position state
           vel: 10.0 # velocity state
-          acc: 100.0 # acceleration state
 
-        corrections: [
-          # positional correction only makes the estimator unstable, vel_hw_api is not a derivative of pos_hw_api, vel_hw_api_only works best
-          "pos_hw_api"
-        ]
+    open_vins: # namespace of the state estimator
 
-        pos_hw_api:
-          state_id: 0 # 0 - position, 1 - velocity, 2 - acceleration
-          noise: 0.001 # measurement noise covariance (R)
-          noise_unhealthy_coeff: 100.0 # covariance gets multiplied by this coefficient when correction is unhealthy (R)
-
-          transform:
-            enabled: false
-
-          message:
-            type: "geometry_msgs/PointStamped"
-            topic: "hw_api/position" # without uav namespace
-            limit:
-              delay: 1.0 # [s] messages with higher delay will flag correction as unhealthy
-              time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
-
-          processors: [] # types of processors attached to this measurement
-
-    # namespace of the state estimator
-    open_vins:
-
-      address: "open_vins/OpenVinsEstimatorPlugin"
-
-      requires: # data required from the hw api
-        gnss: false
-        imu: false
-        distance_sensor: false
-        altitude: false
-        magnetometer_heading: false
-        position: false
-        orientation: true
-        velocity: true
-        angular_velocity: true
-
-      override_frame_id: # override the default frame_id with a custom one
-        enabled: true
-        frame_id: "vio_origin" # the desired frame_id without the UAV namespace
+      frame_id: "vio_origin" # the desired frame_id without the UAV namespace
 
       estimators: # the names of the partial estimators
         lateral:
           name: "lat_open_vins"
         altitude:
           name: "alt_open_vins"
-          # name: "alt_garmin"
         heading:
           name: "hdg_open_vins"
           passthrough: false # if true, then heading is not estimated but passed through from the orientation topic
@@ -117,7 +84,7 @@ mrs_uav_managers:
         angular_velocity: "hw_api/angular_velocity" # angular velocity passthrough
 
       # namespace of the altitude estimator
-      alt_open_vins: # namespace of the altitude estimator
+      alt_open_vins:
 
         max_flight_z: 100.0 # [m] maximum allowed flight Z (in the estimator frame)
 
@@ -127,7 +94,7 @@ mrs_uav_managers:
 
         repredictor: # repredictor for correct fusion of delayed measurements
           enabled: true
-          buffer_size: 200 # [samples] how many states and corrections are kept in history (i.e. estimator running at the default 100 Hz rate will be able to fuse corrections with up to 2 s delay with buffer size of 200 samples)
+          buffer_size: 200 # [samples] how many states and corrections are kept in history
 
         process_noise: # process noise covariance (Q)
           pos: 1.0 # position state
@@ -150,9 +117,11 @@ mrs_uav_managers:
               time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
 
           processors: [] # types of processors attached to this measurement
+          transform:
+            enabled: false
 
       # namespace of the heading estimator
-      hdg_open_vins: # namespace of the heading estimator
+      hdg_open_vins:
 
         max_flight_z: 100.0 # [m] maximum allowed flight Z (in the estimator frame)
 
@@ -160,7 +129,7 @@ mrs_uav_managers:
 
         repredictor: # repredictor for correct fusion of delayed measurements
           enabled: true
-          buffer_size: 200 # [samples] how many states and corrections are kept in history (i.e. estimator running at the default 100 Hz rate will be able to fuse corrections with up to 2 s delay with buffer size of 200 samples)
+          buffer_size: 200 # [samples] how many states and corrections are kept in history
 
         process_noise: # process noise covariance (Q)
           pos: 0.1 # position state
@@ -182,9 +151,11 @@ mrs_uav_managers:
               time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
 
           processors: [] # types of processors attached to this measurement
+          transform:
+            enabled: false
 
       # namespace of the lateral estimator
-      lat_open_vins: # namespace of the lateral estimator
+      lat_open_vins:
 
         hdg_source_topic: "vio/hdg_vio/output" # [mrs_uav_state_estimation/EstimatorOutput]
 
@@ -196,7 +167,7 @@ mrs_uav_managers:
 
         repredictor: # repredictor for correct fusion of delayed measurements
           enabled: true
-          buffer_size: 200 # [samples] how many states and corrections are kept in history (i.e. estimator running at the default 100 Hz rate will be able to fuse corrections with up to 2 s delay with buffer size of 200 samples)
+          buffer_size: 200 # [samples] how many states and corrections are kept in history
 
         process_noise: # process noise covariance (Q)
           pos: 0.1 # position state
@@ -220,6 +191,8 @@ mrs_uav_managers:
               time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
 
           processors: [] # types of processors attached to this measurement
+          transform:
+            enabled: false
 
         vel_vio:
           state_id: 1 # 0 - position, 1 - velocity, 2 - acceleration
@@ -234,6 +207,8 @@ mrs_uav_managers:
               time_since_last: 0.5 # [s] larger time step between messages will flag correction as unhealthy
 
           processors: [] # types of processors attached to this measurement
+          transform:
+            enabled: false
 
   transform_manager:
 
@@ -250,8 +225,8 @@ mrs_uav_managers:
   constraint_manager:
 
     estimator_types: [
-      "open_vins",
       "gps_baro",
+      "open_vins",
     ]
 
     # list of allowed gains per odometry mode
@@ -266,8 +241,8 @@ mrs_uav_managers:
   gain_manager:
 
     estimator_types: [
-      "open_vins",
       "gps_baro",
+      "open_vins",
     ]
 
     # list of allowed gains per odometry mode
@@ -276,8 +251,8 @@ mrs_uav_managers:
       open_vins: ["soft", "supersoft"]
 
     default_gains:
-      gps_baro: "supersoft"
-      open_vins: "supersoft"
+      gps_baro: "soft"
+      open_vins: "soft"
 
     supersoft:
 
@@ -287,9 +262,31 @@ mrs_uav_managers:
 
     soft:
 
-      mass_estimator:
+      horizontal:
+        kp: 8.0
+        kv: 4.0
+        ka: 1.0
 
-        km: 0.05 # [kg/s], mass estimator max rate
+        kib: 0.1
+        kib_lim: 10.0
+
+        kiw: 0.1
+        kiw_lim: 10.0
+
+      vertical:
+        kp: 15.0
+        kv: 8.0
+        ka: 1.0
+
+      attitude:
+        kq_roll_pitch: 5.0
+        kq_yaw: 5.0
+
+      mass_estimator:
+        km: 0.05
+
+        # the maximum estimated uav mass difference
+        km_lim: 20.0 # [kg, at least 1/2 of the UAVs mass to allow landing detection]
 
 mrs_uav_trackers:
 

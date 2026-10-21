@@ -1,5 +1,10 @@
 *.swo
 *.swp
 
-ros_packages/.gitman
-.gitman
+# ROS 2 build artifacts
+build/
+install/
+log/
+
+# Docker user workspace
+docker/
